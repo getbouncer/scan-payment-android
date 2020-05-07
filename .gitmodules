@@ -1,0 +1,3 @@
+[submodule "scan-framework-android"]
+	path = scan-framework-android
+	url = https://github.com/getbouncer/scan-framework-android
