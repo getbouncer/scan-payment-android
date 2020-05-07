@@ -63,7 +63,9 @@ abstract class PaymentCardResultAggregator<ImageFormat>(
             0
         }
     }
-}/**
+}
+
+/**
  * Identify valid cards to be those with valid numbers. If a [requiredCardNumber] is provided, only matching cards are
  * considered valid.
  *
