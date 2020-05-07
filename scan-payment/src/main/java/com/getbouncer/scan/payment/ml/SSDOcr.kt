@@ -1,6 +1,7 @@
 package com.getbouncer.scan.payment.ml
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
@@ -18,7 +19,6 @@ import com.getbouncer.scan.framework.ml.ssd.toRectForm
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.R
-import com.getbouncer.scan.payment.image.CardPreviewImage
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
 import com.getbouncer.scan.payment.ml.ssd.combinePriors
@@ -88,13 +88,15 @@ private val FEATURE_MAP_SIZES =
  */
 private val PRIORS = combinePriors()
 
-data class OcrCardPan(val pan: String, val detectedBoxes: List<DetectionBox>)
+data class PaymentCardPanOcr(val pan: String, val detectedBoxes: List<DetectionBox>)
 
 /**
  * This model performs SSD OCR recognition on a card.
  */
 class SSDOcr private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<CardPreviewImage, Array<ByteBuffer>, OcrCardPan, Map<Int, Array<FloatArray>>>(interpreter) {
+    TensorFlowLiteAnalyzer<SSDOcr.SSDOcrInput, Array<ByteBuffer>, PaymentCardPanOcr, Map<Int, Array<FloatArray>>>(interpreter) {
+
+    data class SSDOcrInput(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect)
 
     companion object {
         /**
@@ -145,7 +147,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         1 to arrayOf(FloatArray(NUM_LOC))
     )
 
-    override fun transformData(data: CardPreviewImage): Array<ByteBuffer> {
+    override fun transformData(data: SSDOcrInput): Array<ByteBuffer> {
         val cardCrop = calculateCrop(
             data.fullImage.size(),
             data.previewSize,
@@ -159,7 +161,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         )
     }
 
-    override fun interpretMLOutput(data: CardPreviewImage, mlOutput: Map<Int, Array<FloatArray>>): OcrCardPan {
+    override fun interpretMLOutput(data: SSDOcrInput, mlOutput: Map<Int, Array<FloatArray>>): PaymentCardPanOcr {
         val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
         val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
 
@@ -194,7 +196,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         ).sortedBy { it.rect.left })
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
-        return OcrCardPan(predictedNumber, detectedBoxes)
+        return PaymentCardPanOcr(predictedNumber, detectedBoxes)
     }
 
     override fun executeInference(

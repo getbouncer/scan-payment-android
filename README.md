@@ -2,7 +2,7 @@
 
 This repository contains the machine learning models and payment card utilities needed to quickly and accurately scan payment cards. [CardScan](https://cardscan.io/) is a relatively small library (1.9 MB) that provides fast and accurate payment card scanning.
 
-Note this library does not contain any user interfaces. Another library, [scan-payment-ui](https://github.com/getbouncer/scan-payment-ui-android) builds upon this one any adds simple user interfaces. 
+Note this library does not contain any user interfaces. Another library, [cardscan-ui](https://github.com/getbouncer/cardscan-ui-android) builds upon this one any adds simple user interfaces. 
 
 scan-payment serves as the foundation for CardScan and CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 
@@ -41,7 +41,7 @@ dependencies {
 
 ## Using scan-payment
 
-scan-payment is designed to be used with [scan-payment-ui](https://github.com/getbouncer/scan-payment-ui-android), which will provide user interfaces for scanning payment cards. However, it can be used independently.
+scan-payment is designed to be used with [cardscan-ui](https://github.com/getbouncer/cardscan-ui-android), which will provide user interfaces for scanning payment cards. However, it can be used independently.
 
 For an overview of the architecture and design of the scan framework, see the [architecture documentation](https://github.com/getbouncer/scan-framework-android/tree/master/docs/architecture.md).
 
