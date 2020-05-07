@@ -1,6 +1,6 @@
 # Release
 
-cardscan-base release guide
+Release guide
 
 ## Contents
 
@@ -39,14 +39,14 @@ The release version of this library is determined by the value of the `version` 
 
 1. run:
     ```bash
-    github_changelog_generator -u getbouncer -p cardscan-base-android -t `cat github_token`
+    github_changelog_generator -u getbouncer -p scan-payment-android -t `cat github_token`
     ```
 
 1. Create a new pull request with the updated changelog, get it approved, and merged.
 
 ## Installing to local maven
 
-* execute `./gradlew cardscan-base:install`
+* execute `./gradlew scan-payment:install`
 
 ## Installing to BinTray
 
@@ -60,9 +60,9 @@ The release version of this library is determined by the value of the `version` 
 
 1. build and upload the library
     ```bash
-    ./gradlew cardscan-base:build
-    ./gradlew cardscan-base:install
-    ./gradlew cardscan-base:bintrayUpload
+    ./gradlew scan-payment:build
+    ./gradlew scan-payment:install
+    ./gradlew scan-payment:bintrayUpload
     ```
 
 1. Make sure you update docs in this readme and the apidocs repo.
