@@ -6,7 +6,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.image.size
-import com.getbouncer.scan.payment.image.CardPreviewImage
 import com.getbouncer.scan.payment.test.R
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -24,7 +23,7 @@ class ModelTest {
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(CardPreviewImage(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(SSDOcr.SSDOcrInput(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction)
         assertEquals("4557095462268383", prediction.pan)
     }
@@ -36,8 +35,8 @@ class ModelTest {
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
 
-        val prediction1 = model.analyze(CardPreviewImage(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
-        val prediction2 = model.analyze(CardPreviewImage(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction1 = model.analyze(SSDOcr.SSDOcrInput(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction2 = model.analyze(SSDOcr.SSDOcrInput(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction1)
         assertEquals("4557095462268383", prediction1.pan)
 
