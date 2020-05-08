@@ -35,6 +35,7 @@ The scan-payment libraries are published in the [jcenter](https://jcenter.bintra
 
 ```gradle
 dependencies {
+    implementation 'com.getbouncer:scan-framework:2.0.0005'
     implementation 'com.getbouncer:scan-payment:2.0.0005'
 }
 ```
