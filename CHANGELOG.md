@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.0006](https://github.com/getbouncer/scan-payment-android/tree/2.0.0006) (2020-05-09)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0005...2.0.0006)
+
+**Merged pull requests:**
+
+- update version [\#3](https://github.com/getbouncer/scan-payment-android/pull/3) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0005](https://github.com/getbouncer/scan-payment-android/tree/2.0.0005) (2020-05-08)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/d19502708ef72c01d522e2d18e7a8bfbb81ec0b2...2.0.0005)
