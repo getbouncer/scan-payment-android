@@ -22,11 +22,11 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          script: ./gradlew cardscan-ui:connectedCheck
+          script: ./gradlew scan-payment:connectedCheck
 
       - name: upload-artifacts
         uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: test-report
-          path: ${{ github.workspace }}/cardscan-ui/build/reports/
+          path: ${{ github.workspace }}/scan-payment/build/reports/
