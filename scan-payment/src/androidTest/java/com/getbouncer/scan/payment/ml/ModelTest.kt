@@ -9,18 +9,23 @@ import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.payment.test.R
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class ModelTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
+    /**
+     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
+     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
+     * withContext(Dispatchers.Default).
+     *
+     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
+     */
     @Test
     @MediumTest
-    @ExperimentalCoroutinesApi
-    fun resourceModelExecution_works() = runBlockingTest {
+    fun resourceModelExecution_works() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
@@ -30,10 +35,16 @@ class ModelTest {
         assertEquals("4557095462268383", prediction.pan)
     }
 
+    /**
+     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
+     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
+     * withContext(Dispatchers.Default).
+     *
+     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
+     */
     @Test
     @MediumTest
-    @ExperimentalCoroutinesApi
-    fun resourceModelExecution_worksRepeatedly() = runBlockingTest {
+    fun resourceModelExecution_worksRepeatedly() = runBlocking {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
