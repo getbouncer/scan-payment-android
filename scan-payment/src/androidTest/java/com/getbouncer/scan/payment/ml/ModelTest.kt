@@ -16,6 +16,13 @@ class ModelTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
+    /**
+     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
+     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
+     * withContext(Dispatchers.Default).
+     *
+     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
+     */
     @Test
     @MediumTest
     fun resourceModelExecution_works() = runBlocking {
@@ -28,6 +35,13 @@ class ModelTest {
         assertEquals("4557095462268383", prediction.pan)
     }
 
+    /**
+     * TODO: this method should use runBlockingTest instead of runBlocking. However, an issue with
+     * runBlockingTest currently fails when functions under test use withContext(Dispatchers.IO) or
+     * withContext(Dispatchers.Default).
+     *
+     * See https://github.com/Kotlin/kotlinx.coroutines/issues/1204 for details.
+     */
     @Test
     @MediumTest
     fun resourceModelExecution_worksRepeatedly() = runBlocking {
