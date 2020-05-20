@@ -7,9 +7,10 @@ import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.payment.test.R
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
 class ModelTest {
@@ -18,7 +19,8 @@ class ModelTest {
 
     @Test
     @MediumTest
-    fun resourceModelExecution_works() = runBlocking {
+    @ExperimentalCoroutinesApi
+    fun resourceModelExecution_works() = runBlockingTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
@@ -30,7 +32,8 @@ class ModelTest {
 
     @Test
     @MediumTest
-    fun resourceModelExecution_worksRepeatedly() = runBlocking {
+    @ExperimentalCoroutinesApi
+    fun resourceModelExecution_worksRepeatedly() = runBlockingTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
