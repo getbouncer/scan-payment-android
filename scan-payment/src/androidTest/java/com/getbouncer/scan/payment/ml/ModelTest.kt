@@ -7,9 +7,9 @@ import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.image.size
 import com.getbouncer.scan.payment.test.R
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Test
 
