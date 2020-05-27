@@ -88,15 +88,15 @@ private val FEATURE_MAP_SIZES =
  */
 private val PRIORS = combinePriors()
 
-data class PaymentCardPanOcr(val pan: String, val detectedBoxes: List<DetectionBox>)
-
 /**
  * This model performs SSD OCR recognition on a card.
  */
 class SSDOcr private constructor(interpreter: Interpreter) :
-    TensorFlowLiteAnalyzer<SSDOcr.SSDOcrInput, Array<ByteBuffer>, PaymentCardPanOcr, Map<Int, Array<FloatArray>>>(interpreter) {
+    TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
 
-    data class SSDOcrInput(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect)
+    data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
+
+    data class Input(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect)
 
     companion object {
         /**
@@ -147,7 +147,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         1 to arrayOf(FloatArray(NUM_LOC))
     )
 
-    override fun transformData(data: SSDOcrInput): Array<ByteBuffer> {
+    override fun transformData(data: Input): Array<ByteBuffer> {
         val cardCrop = calculateCrop(
             data.fullImage.size(),
             data.previewSize,
@@ -161,7 +161,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         )
     }
 
-    override fun interpretMLOutput(data: SSDOcrInput, mlOutput: Map<Int, Array<FloatArray>>): PaymentCardPanOcr {
+    override fun interpretMLOutput(data: Input, mlOutput: Map<Int, Array<FloatArray>>): Prediction {
         val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
         val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
 
@@ -196,7 +196,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         ).sortedBy { it.rect.left })
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
-        return PaymentCardPanOcr(predictedNumber, detectedBoxes)
+        return Prediction(predictedNumber, detectedBoxes)
     }
 
     override fun executeInference(
