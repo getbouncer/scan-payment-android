@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0008](https://github.com/getbouncer/scan-payment-android/tree/2.0.0008) (2020-05-21)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0007...2.0.0008)
+
+**Merged pull requests:**
+
+- Use better coroutine testing [\#13](https://github.com/getbouncer/scan-payment-android/pull/13) ([awushensky](https://github.com/awushensky))
+- Bump kotlinx-coroutines-core from 1.3.6 to 1.3.7 [\#12](https://github.com/getbouncer/scan-payment-android/pull/12) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump kotlinx-coroutines-android from 1.3.6 to 1.3.7 [\#11](https://github.com/getbouncer/scan-payment-android/pull/11) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump com.github.dcendents.android-maven from 2.0 to 2.1 [\#10](https://github.com/getbouncer/scan-payment-android/pull/10) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump com.jfrog.bintray from 1.7.3 to 1.8.5 [\#7](https://github.com/getbouncer/scan-payment-android/pull/7) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Add tests [\#5](https://github.com/getbouncer/scan-payment-android/pull/5) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0007](https://github.com/getbouncer/scan-payment-android/tree/2.0.0007) (2020-05-12)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0006...2.0.0007)

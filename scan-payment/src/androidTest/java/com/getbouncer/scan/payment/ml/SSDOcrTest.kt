@@ -12,7 +12,7 @@ import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
-class ModelTest {
+class SSDOcrTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
@@ -30,7 +30,7 @@ class ModelTest {
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
 
-        val prediction = model.analyze(SSDOcr.SSDOcrInput(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction = model.analyze(SSDOcr.Input(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction)
         assertEquals("4557095462268383", prediction.pan)
     }
@@ -49,14 +49,14 @@ class ModelTest {
         val model = SSDOcr.Factory(appContext, SSDOcr.ModelLoader(appContext)).newInstance()
         assertNotNull(model)
 
-        val prediction1 = model.analyze(SSDOcr.SSDOcrInput(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
-        val prediction2 = model.analyze(SSDOcr.SSDOcrInput(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction1 = model.analyze(SSDOcr.Input(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
+        val prediction2 = model.analyze(SSDOcr.Input(bitmap, bitmap.size(), bitmap.size().toRect()), Unit)
         assertNotNull(prediction1)
         assertEquals("4557095462268383", prediction1.pan)
 
         assertNotNull(prediction2)
         assertEquals("4557095462268383", prediction2.pan)
     }
-}
 
-fun Size.toRect(): Rect = Rect(0, 0, width, height)
+    private fun Size.toRect(): Rect = Rect(0, 0, width, height)
+}

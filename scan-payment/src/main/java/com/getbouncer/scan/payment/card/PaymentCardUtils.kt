@@ -1,6 +1,8 @@
 @file:JvmName("PaymentCardUtils")
 package com.getbouncer.scan.payment.card
 
+import android.text.TextUtils
+
 /*
  * Payment cards always have a PAN (Primary Account Number) on one side of the card. This PAN
  * contains identification information about the card itself.
@@ -79,6 +81,11 @@ package com.getbouncer.scan.payment.card
 
 private const val IIN_LENGTH = 6
 private const val LAST_FOUR_LENGTH = 4
+
+/**
+ * The Jaccard similarity threshold for determining if two numbers are possibly the same.
+ */
+private const val JACCARD_SIMILARITY_THRESHOLD = 0.5
 
 private val VALID_CVC_LENGTHS = 3..4
 
@@ -183,3 +190,36 @@ private fun getIssuerData(issuer: CardIssuer): List<IssuerData> =
  * Normalize a PAN by removing all non-numeric characters.
  */
 internal fun normalizeCardNumber(cardNumber: String?) = cardNumber?.filter { it.isDigit() } ?: ""
+
+/**
+ * Determine if the pan is valid or close to valid.
+ */
+fun isPossiblyValidPan(pan: String?) = pan != null && TextUtils.isDigitsOnly(pan) && pan.length >= 7
+
+/**
+ * Determine if the pan is not close to being valid.
+ */
+fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly(pan) || pan.length < 10
+
+/**
+ * Determine if a card number (PAN, IIN, last four) possibly matches a required number (PAN, IIN, last four). This
+ * method is designed to compare the same kinds of numbers. for example, a PAN compared to another PAN, or an IIN
+ * compared to another IIN. This method will not correctly compare different values, such as an IIN to a PAN.
+ */
+fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
+    scanned != null && TextUtils.isDigitsOnly(scanned) &&
+            (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD)
+
+/**
+ * Calculate the jaccard index (similarity) between two strings. Values can range from 0 (no
+ * similarities) to 1 (the same). Note that this does not account for character order, so two
+ * strings "abcd" and "bdca" have a jaccard index of 1.
+ */
+private fun jaccardIndex(string1: String, string2: String): Double {
+    val set1 = string1.toSet()
+    val set2 = string2.toSet()
+
+    val intersection = set1.intersect(set2)
+
+    return intersection.size.toDouble() / (set1.size + set2.size - intersection.size)
+}
