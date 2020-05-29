@@ -109,7 +109,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          * 3. the fullImage and the previewImage have the same orientation
          */
         fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
-            assert(cardFinder.left >= 0 &&
+            require(cardFinder.left >= 0 &&
                     cardFinder.right <= previewImage.width &&
                     cardFinder.top >= 0 &&
                     cardFinder.bottom <= previewImage.height
