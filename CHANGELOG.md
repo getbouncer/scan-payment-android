@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0009](https://github.com/getbouncer/scan-payment-android/tree/2.0.0009) (2020-05-29)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0008...2.0.0009)
+
+**Merged pull requests:**
+
+- Bump core-ktx from 1.2.0 to 1.3.0 [\#18](https://github.com/getbouncer/scan-payment-android/pull/18) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Relocate aggregator [\#17](https://github.com/getbouncer/scan-payment-android/pull/17) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0008](https://github.com/getbouncer/scan-payment-android/tree/2.0.0008) (2020-05-21)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0007...2.0.0008)
