@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.0010](https://github.com/getbouncer/scan-payment-android/tree/2.0.0010) (2020-05-30)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0009...2.0.0010)
+
+**Merged pull requests:**
+
+- Bump gradle from 3.6.3 to 4.0.0 [\#19](https://github.com/getbouncer/scan-payment-android/pull/19) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+
 ## [2.0.0009](https://github.com/getbouncer/scan-payment-android/tree/2.0.0009) (2020-05-29)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0008...2.0.0009)
