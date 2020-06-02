@@ -6,11 +6,11 @@ import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ResourceLoader
-import com.getbouncer.scan.framework.image.crop
-import com.getbouncer.scan.framework.image.hasOpenGl31
-import com.getbouncer.scan.framework.image.scale
-import com.getbouncer.scan.framework.image.size
-import com.getbouncer.scan.framework.image.toRGBByteBuffer
+import com.getbouncer.scan.framework.crop
+import com.getbouncer.scan.framework.hasOpenGl31
+import com.getbouncer.scan.framework.scale
+import com.getbouncer.scan.framework.size
+import com.getbouncer.scan.framework.toRGBByteBuffer
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
