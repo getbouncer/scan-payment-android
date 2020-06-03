@@ -1,6 +1,5 @@
 package com.getbouncer.scan.payment.analyzer
 
-import android.util.Log
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.payment.ml.SSDOcr
@@ -25,7 +24,6 @@ class PaymentCardOcrAnalyzer private constructor(
     override val name: String = "payment_card_ocr_analyzer"
 
     override suspend fun analyze(data: SSDOcr.Input, state: PaymentCardOcrState) = supervisorScope {
-        Log.d("DEBUG", "running name detect? ${nameDetect != null} ${state.runNameExtraction}")
         val cardDetectFuture = if (state.runNameExtraction && nameDetect != null) {
             this.async {
                 nameDetect.analyze(data, state)
