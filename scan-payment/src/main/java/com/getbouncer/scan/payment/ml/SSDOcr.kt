@@ -155,10 +155,11 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             data.cardFinder
         )
 
-        return arrayOf(data.fullImage
-            .crop(cardCrop)
-            .scale(Factory.TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+        return arrayOf(
+            data.fullImage
+                .crop(cardCrop)
+                .scale(Factory.TRAINED_IMAGE_SIZE)
+                .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
         )
     }
 
