@@ -1,11 +1,11 @@
 package com.getbouncer.scan.payment.card
 
 import androidx.test.filters.SmallTest
+import org.junit.Test
 import java.util.Calendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
 
 private const val SAMPLE_AMEX_PAN = "340000000000009"
 private const val SAMPLE_DINERS_CLUB_PAN_14 = "36281412218285"

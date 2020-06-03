@@ -107,10 +107,12 @@ class NameDetectAnalyzer private constructor(
         var nameX = 0
         while (nameX < nameWidth - charWidth) {
             val firstLetterBitmap = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height)
-            predictions.add(CharPredictionWithBox(
-                alphabetDetect.analyze(AlphabetDetect.Input(firstLetterBitmap), Unit),
-                RectF(nameX.toFloat(), 0F, height.toFloat(), height.toFloat())
-            ))
+            predictions.add(
+                CharPredictionWithBox(
+                    characterPrediction = alphabetDetect.analyze(AlphabetDetect.Input(firstLetterBitmap), Unit),
+                    box = RectF(nameX.toFloat(), 0F, height.toFloat(), height.toFloat())
+                )
+            )
             nameX += charWidth / NUM_PREDICTION_STRIDES
         }
 
@@ -127,9 +129,7 @@ class NameDetectAnalyzer private constructor(
             NMS_THRESHOLD,
             limit = 0
         )
-        return processNMSResults(predictions.filterIndexed { index, _ ->
-            indices.contains(index)
-        })
+        return processNMSResults(predictions.filterIndexed { index, _ -> indices.contains(index) })
     }
 
     /**

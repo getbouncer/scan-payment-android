@@ -71,10 +71,7 @@ private fun getFourDigitYear(year: String, calendar: Calendar): Int = year.digit
     when {
         it.length == 4 -> it.toIntOrNull()
         it.length > 4 -> it.takeLast(4).toIntOrNull()
-        else -> (
-                getCurrentCentury(calendar) +
-                        it.padStart(2, '0').takeLast(2)
-                ).toIntOrNull()
+        else -> (getCurrentCentury(calendar) + it.padStart(2, '0').takeLast(2)).toIntOrNull()
     } ?: 0
 }
 

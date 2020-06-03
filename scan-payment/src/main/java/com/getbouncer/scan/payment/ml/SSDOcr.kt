@@ -25,11 +25,11 @@ import com.getbouncer.scan.payment.ml.ssd.combinePriors
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.filterVerticalBoxes
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
+import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.tensorflow.lite.Interpreter
 
 /** Training images are normalized with mean 127.5 and std 128.5. */
 private const val IMAGE_MEAN = 127.5f
@@ -109,7 +109,8 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          * 3. the fullImage and the previewImage have the same orientation
          */
         fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
-            require(cardFinder.left >= 0 &&
+            require(
+                cardFinder.left >= 0 &&
                     cardFinder.right <= previewImage.width &&
                     cardFinder.top >= 0 &&
                     cardFinder.bottom <= previewImage.height
@@ -154,10 +155,11 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             data.cardFinder
         )
 
-        return arrayOf(data.fullImage
-            .crop(cardCrop)
-            .scale(Factory.TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+        return arrayOf(
+            data.fullImage
+                .crop(cardCrop)
+                .scale(Factory.TRAINED_IMAGE_SIZE)
+                .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
         )
     }
 
@@ -189,14 +191,16 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         ).reshape(NUM_OF_CLASSES)
         scores.forEach { it.softMax2D() }
 
-        val detectedBoxes = filterVerticalBoxes(extractPredictions(
-            scores = scores,
-            boxes = boxes,
-            probabilityThreshold = PROB_THRESHOLD,
-            intersectionOverUnionThreshold = IOU_THRESHOLD,
-            limit = LIMIT,
-            classifierToLabel = { if (it == 10) 0 else it }
-        ).sortedBy { it.rect.left })
+        val detectedBoxes = filterVerticalBoxes(
+            extractPredictions(
+                scores = scores,
+                boxes = boxes,
+                probabilityThreshold = PROB_THRESHOLD,
+                intersectionOverUnionThreshold = IOU_THRESHOLD,
+                limit = LIMIT,
+                classifierToLabel = { if (it == 10) 0 else it }
+            ).sortedBy { it.rect.left }
+        )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
         return Prediction(predictedNumber, detectedBoxes)
