@@ -109,7 +109,8 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          * 3. the fullImage and the previewImage have the same orientation
          */
         fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
-            require(cardFinder.left >= 0 &&
+            require(
+                cardFinder.left >= 0 &&
                     cardFinder.right <= previewImage.width &&
                     cardFinder.top >= 0 &&
                     cardFinder.bottom <= previewImage.height
@@ -189,14 +190,16 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         ).reshape(NUM_OF_CLASSES)
         scores.forEach { it.softMax2D() }
 
-        val detectedBoxes = filterVerticalBoxes(extractPredictions(
-            scores = scores,
-            boxes = boxes,
-            probabilityThreshold = PROB_THRESHOLD,
-            intersectionOverUnionThreshold = IOU_THRESHOLD,
-            limit = LIMIT,
-            classifierToLabel = { if (it == 10) 0 else it }
-        ).sortedBy { it.rect.left })
+        val detectedBoxes = filterVerticalBoxes(
+            extractPredictions(
+                scores = scores,
+                boxes = boxes,
+                probabilityThreshold = PROB_THRESHOLD,
+                intersectionOverUnionThreshold = IOU_THRESHOLD,
+                limit = LIMIT,
+                classifierToLabel = { if (it == 10) 0 else it }
+            ).sortedBy { it.rect.left }
+        )
 
         val predictedNumber = detectedBoxes.map { it.label }.joinToString("")
         return Prediction(predictedNumber, detectedBoxes)

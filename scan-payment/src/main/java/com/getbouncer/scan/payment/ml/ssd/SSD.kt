@@ -31,19 +31,9 @@ internal fun rearrangeOCRArray(
     numberOfPriors: Int,
     locationsPerPrior: Int
 ): Array<FloatArray> {
-    val totalLocationsForAllLayers = (
-        (
-            featureMapSizes.layerOneWidth
-            * featureMapSizes.layerOneHeight
-            * numberOfPriors
-            * locationsPerPrior
-        ) + (
-            featureMapSizes.layerTwoWidth
-            * featureMapSizes.layerTwoHeight
-            * numberOfPriors
-            * locationsPerPrior
-        )
-    )
+    val totalLocationsForAllLayers =
+        featureMapSizes.layerOneWidth * featureMapSizes.layerOneHeight * numberOfPriors * locationsPerPrior +
+            featureMapSizes.layerTwoWidth * featureMapSizes.layerTwoHeight * numberOfPriors * locationsPerPrior
     val rearranged = Array(1) { FloatArray(totalLocationsForAllLayers) }
     val featureMapHeights = arrayOf(
         featureMapSizes.layerOneHeight,

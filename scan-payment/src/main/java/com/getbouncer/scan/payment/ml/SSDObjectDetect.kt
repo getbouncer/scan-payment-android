@@ -161,9 +161,9 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
         fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
             require(
                 cardFinder.left >= 0 &&
-                cardFinder.right <= previewImage.width &&
-                cardFinder.top >= 0 &&
-                cardFinder.bottom <= previewImage.height
+                    cardFinder.right <= previewImage.width &&
+                    cardFinder.top >= 0 &&
+                    cardFinder.bottom <= previewImage.height
             ) { "Card finder is outside preview image bounds" }
 
             // Calculate the object detection square based on the card finder, limited by the preview
@@ -225,15 +225,16 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
 
     override fun transformData(data: Input): Array<ByteBuffer> =
         arrayOf(
-            data.fullImage.crop(
-                calculateCrop(
-                    data.fullImage.size(),
-                    data.previewSize,
-                    data.cardFinder
+            data.fullImage
+                .crop(
+                    calculateCrop(
+                        data.fullImage.size(),
+                        data.previewSize,
+                        data.cardFinder
+                    )
                 )
-            )
-            .scale(TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+                .scale(TRAINED_IMAGE_SIZE)
+                .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
         )
 
     override fun interpretMLOutput(
