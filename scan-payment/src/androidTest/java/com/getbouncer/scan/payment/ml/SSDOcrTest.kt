@@ -7,10 +7,10 @@ import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.getbouncer.scan.framework.size
 import com.getbouncer.scan.payment.test.R
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class SSDOcrTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext

@@ -25,11 +25,11 @@ import com.getbouncer.scan.payment.ml.ssd.combinePriors
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.filterVerticalBoxes
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
+import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.tensorflow.lite.Interpreter
 
 /** Training images are normalized with mean 127.5 and std 128.5. */
 private const val IMAGE_MEAN = 127.5f

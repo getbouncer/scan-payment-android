@@ -12,18 +12,20 @@ import com.getbouncer.scan.framework.scale
 import com.getbouncer.scan.framework.toRGBByteBuffer
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.payment.R
+import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
-import org.tensorflow.lite.Interpreter
 
 private val TRAINED_IMAGE_SIZE = Size(48, 48)
 
-/** model returns whether or not there is a screen present */
+/**
+ * model returns whether or not there is a screen present
+ */
 private const val NUM_CLASS = 27
 class AlphabetDetect private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<AlphabetDetect.Input, ByteBuffer,
-            AlphabetDetect.Prediction,
-            Array<FloatArray>>(interpreter) {
+        AlphabetDetect.Prediction,
+        Array<FloatArray>>(interpreter) {
 
     data class Input(val objDetectionImage: Bitmap)
 
