@@ -94,9 +94,9 @@ private val PRIORS = combinePriors()
 class SSDOcr private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
 
-    data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
-
     data class Input(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect)
+
+    data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
     companion object {
         /**
@@ -161,7 +161,10 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         )
     }
 
-    override fun interpretMLOutput(data: Input, mlOutput: Map<Int, Array<FloatArray>>): Prediction {
+    override fun interpretMLOutput(
+        data: Input,
+        mlOutput: Map<Int, Array<FloatArray>>
+    ): Prediction {
         val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
         val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
 
