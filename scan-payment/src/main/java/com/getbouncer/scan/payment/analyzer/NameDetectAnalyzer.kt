@@ -2,6 +2,7 @@ package com.getbouncer.scan.payment.analyzer
 
 import android.graphics.Bitmap
 import android.graphics.RectF
+import android.util.Log
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.ml.ssd.hardNonMaximumSuppression
@@ -13,11 +14,16 @@ import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.scaled
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.toObjectDetectionCroppedImage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.supervisorScope
+import kotlin.coroutines.CoroutineContext
 
 // Some params for how we post process our name detector
 // Number of predictions per predicted character box
 private const val NUM_PREDICTION_STRIDES = 10
-private const val NMS_THRESHOLD = 0.75F
+private const val NMS_THRESHOLD = 0.85F
 private const val CHAR_CONFIDENCE_THRESHOLD = 0.7
 
 class NameDetectAnalyzer private constructor(
@@ -37,33 +43,36 @@ class NameDetectAnalyzer private constructor(
     override suspend fun analyze(
         data: SSDOcr.Input,
         state: PaymentCardOcrState
-    ) = if (!state.runNameExtraction || ssdObjectDetect == null || alphabetDetect == null) {
-        Output("", null)
-    } else {
-        val objDetectInput = SSDObjectDetect.Input(
-            fullImage = data.fullImage,
-            previewSize = data.previewSize,
-            cardFinder = data.cardFinder,
-            iin = null
-        )
-
-        val output = ssdObjectDetect.analyze(objDetectInput, Unit)
-        var nameRect: RectF? = null
-
-        // check to see if we detected a name. If so, run our name extraction model, serially for now
-        for (box in output.detectionBoxes) {
-            if (box.label == SSDObjectDetect.Labels.NAME.ordinal) {
-                nameRect = box.rect
-                break
-            }
-        }
-
-        val name = if (nameRect != null) {
-            processPredictions(nameRect, objDetectInput.toObjectDetectionCroppedImage())
+    ) =  supervisorScope {
+        if (!state.runNameExtraction || ssdObjectDetect == null || alphabetDetect == null) {
+            Output("", null)
         } else {
-            null
+            val objDetectInput = SSDObjectDetect.Input(
+                fullImage = data.fullImage,
+                previewSize = data.previewSize,
+                cardFinder = data.cardFinder,
+                iin = null
+            )
+
+            val output = ssdObjectDetect.analyze(objDetectInput, Unit)
+            var nameRect: RectF? = null
+
+            // check to see if we detected a name. If so, run our name extraction model, serially for now
+            for (box in output.detectionBoxes) {
+                if (box.label == SSDObjectDetect.Labels.NAME.ordinal) {
+                    nameRect = box.rect
+                    break
+                }
+            }
+            Log.d("HELLO", "test")
+
+            val name = if (nameRect != null) {
+                processPredictions(nameRect, objDetectInput.toObjectDetectionCroppedImage(), this)
+            } else {
+                null
+            }
+            Output(name, output.detectionBoxes)
         }
-        Output(name, output.detectionBoxes)
     }
 
     internal class CharPredictionWithBox(
@@ -80,8 +89,11 @@ class NameDetectAnalyzer private constructor(
 
     private suspend fun processPredictions(
         nameRect: RectF,
-        bitmapForObjectDetection: Bitmap
+        bitmapForObjectDetection: Bitmap,
+        coroutine: CoroutineScope
     ): String? {
+        Log.d("HELLO", "goodnight")
+
         if (alphabetDetect == null) {
             return null
         }
@@ -105,13 +117,53 @@ class NameDetectAnalyzer private constructor(
 
         // iterate through each stride, making a prediction per stride
         var nameX = 0
-        while (nameX < nameWidth - charWidth) {
-            val firstLetterBitmap = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height)
-            predictions.add(CharPredictionWithBox(
-                alphabetDetect.analyze(AlphabetDetect.Input(firstLetterBitmap), Unit),
-                RectF(nameX.toFloat(), 0F, height.toFloat(), height.toFloat())
-            ))
-            nameX += charWidth / NUM_PREDICTION_STRIDES
+
+        supervisorScope {
+            val futures = ArrayList<Deferred<CharPredictionWithBox>>(2)
+            Log.d("HELLO", "coroutine")
+
+            while (nameX < nameWidth - charWidth) {
+                /*
+                if (futures.size == 2) {
+                    Log.d("HELLO", "here?")
+
+                    // resolve the futures
+                    val f = futures[0]
+                    Log.d("HELLO", "remove? $f")
+                    futures.remove(f)
+                    Log.d("HELLO", "index? $f")
+                    val result = f.await()
+                    Log.d("HELLO", "waiting? $f")
+
+                    Log.d("PREDICTION", "${result.characterPrediction.character} confidence=${result.characterPrediction.confidence}")
+                    predictions.add(result)
+
+                }*/
+                val firstLetterBitmap = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height)
+                Log.d("HELLO", "issue coroutine")
+
+                val prediction = this.async {
+                    CharPredictionWithBox(
+                        alphabetDetect.analyze(AlphabetDetect.Input(firstLetterBitmap), Unit),
+                        RectF(nameX.toFloat(), 0F, height.toFloat(), height.toFloat())
+                    )
+                }
+                Log.d("HELLO", "adding")
+
+                futures.add(prediction)
+                Log.d("HELLO", "added")
+
+                nameX += charWidth / NUM_PREDICTION_STRIDES
+            }
+            for (f in futures) {
+                // resolve the futures
+                Log.d("HELLO", "awaiting")
+                val result = f.await()
+                Log.d("HELLO", "awaited")
+                Log.d("PREDICTION", "${result.characterPrediction.character} confidence=${result.characterPrediction.confidence}")
+                predictions.add(result)
+                //futures.remove(f)
+            }
         }
 
         val (boxes, probabilities) = predictions.map {
@@ -132,6 +184,10 @@ class NameDetectAnalyzer private constructor(
         })
     }
 
+    /**
+     * Processes each cluster of letters from NMS, doing a simple voting algorithm and
+     * tie-breaking with confidence
+     */
     /**
      * Processes each cluster of letters from NMS, doing a simple voting algorithm and
      * tie-breaking with confidence
@@ -174,6 +230,14 @@ class NameDetectAnalyzer private constructor(
      * For example: [1,1,1,1,1,5,6] would yield 5, since p25 is 1, pMax is 6, pMax2 is 5,
      * and pMax - pMax2 << pMax2 - p25
      */
+    /**
+     * Black magic to calculate the "width" (in terms of prediction index) for each space
+     *   Compares the two widest (by index) spaces with the p25 of all of the background
+     *   predictions, then, checks to see if difference between the widest and the second
+     *   widest is sufficiently close compared to the p25
+     * For example: [1,1,1,1,1,5,6] would yield 5, since p25 is 1, pMax is 6, pMax2 is 5,
+     * and pMax - pMax2 << pMax2 - p25
+     */
     private fun getSpacesWidth(spaces: List<Int>): Int {
         if (spaces.size <= 2) {
             return 10
@@ -192,6 +256,9 @@ class NameDetectAnalyzer private constructor(
         }
     }
 
+    /**
+     * Accepts the output from hard NMS and produces the predicted word
+     */
     /**
      * Accepts the output from hard NMS and produces the predicted word
      */
@@ -224,6 +291,7 @@ class NameDetectAnalyzer private constructor(
             }
         }
 
+
         // do one last process if we ended w/ a char
         if (charClusters.size > 0) {
             // process the cluster
@@ -245,6 +313,8 @@ class NameDetectAnalyzer private constructor(
                 numConsecSpaces = 0
             }
         }
+        Log.d("Prediction", "DEBUG: ${debugWord.toString()}")
+        Log.d("Prediction", "OUTPUT: ${word.toString().trim { it <= ' ' }}")
         return word.toString().trim { it <= ' ' }
     }
 

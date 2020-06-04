@@ -24,30 +24,28 @@ class PaymentCardOcrAnalyzer private constructor(
 
     override val name: String = "payment_card_ocr_analyzer"
 
-    override suspend fun analyze(data: SSDOcr.Input, state: PaymentCardOcrState) = supervisorScope {
+    override suspend fun analyze(data: SSDOcr.Input, state: PaymentCardOcrState): Prediction {
         Log.d("DEBUG", "running name detect? ${nameDetect != null} ${state.runNameExtraction}")
         val cardDetectFuture = if (state.runNameExtraction && nameDetect != null) {
-            this.async {
-                nameDetect.analyze(data, state)
-            }
+            nameDetect.analyze(data, state)
         } else {
             null
         }
 
         val ocrFuture = if (state.runOcr && ssdOcr != null) {
-            this.async {
+
                 ssdOcr.analyze(data, Unit)
-            }
+
         } else {
             null
         }
 
-        Prediction(
-            pan = ocrFuture?.await()?.pan,
-            panDetectionBoxes = ocrFuture?.await()?.detectedBoxes,
-            name = cardDetectFuture?.await()?.name,
+        return Prediction(
+            pan = ocrFuture?.pan,
+            panDetectionBoxes = ocrFuture?.detectedBoxes,
+            name = cardDetectFuture?.name,
             expiry = null,
-            objDetectionBoxes = cardDetectFuture?.await()?.boxes,
+            objDetectionBoxes = cardDetectFuture?.boxes,
             isNameExtractionAvailable = nameDetect?.isAvailable() ?: false
         )
     }
