@@ -208,7 +208,7 @@ fun isNotPossiblyValidPan(pan: String?) = pan == null || !TextUtils.isDigitsOnly
  */
 fun numberPossiblyMatches(scanned: String?, required: String?): Boolean =
     scanned != null && TextUtils.isDigitsOnly(scanned) &&
-            (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD)
+        (required == null || jaccardIndex(scanned, required) > JACCARD_SIMILARITY_THRESHOLD)
 
 /**
  * Calculate the jaccard index (similarity) between two strings. Values can range from 0 (no

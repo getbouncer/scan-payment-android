@@ -24,11 +24,11 @@ import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.ObjectPriorsGen
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.rearrangeObjDetectionArray
+import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import org.tensorflow.lite.Interpreter
 
 /** Training images are normalized with mean 127.5. */
 private const val IMAGE_MEAN = 127.5f
@@ -159,7 +159,8 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
          * the position of card finder within the preview image.
          */
         fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
-            assert(cardFinder.left >= 0 &&
+            require(
+                cardFinder.left >= 0 &&
                     cardFinder.right <= previewImage.width &&
                     cardFinder.top >= 0 &&
                     cardFinder.bottom <= previewImage.height
@@ -223,14 +224,17 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
     )
 
     override fun transformData(data: Input): Array<ByteBuffer> =
-        arrayOf(data.fullImage
-            .crop(calculateCrop(
-                data.fullImage.size(),
-                data.previewSize,
-                data.cardFinder
-            ))
-            .scale(TRAINED_IMAGE_SIZE)
-            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+        arrayOf(
+            data.fullImage
+                .crop(
+                    calculateCrop(
+                        data.fullImage.size(),
+                        data.previewSize,
+                        data.cardFinder
+                    )
+                )
+                .scale(TRAINED_IMAGE_SIZE)
+                .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
         )
 
     override fun interpretMLOutput(
