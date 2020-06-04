@@ -17,8 +17,8 @@ import com.getbouncer.scan.payment.ml.toObjectDetectionCroppedImage
 // Some params for how we post process our name detector
 // Number of predictions per predicted character box
 private const val NUM_PREDICTION_STRIDES = 10
-private const val NMS_THRESHOLD = 0.75F
-private const val CHAR_CONFIDENCE_THRESHOLD = 0.7
+private const val NMS_THRESHOLD = 0.85F
+private const val CHAR_CONFIDENCE_THRESHOLD = 0.6
 
 class NameDetectAnalyzer private constructor(
     private val ssdObjectDetect: SSDObjectDetect?,
@@ -107,10 +107,11 @@ class NameDetectAnalyzer private constructor(
         var nameX = 0
         while (nameX < nameWidth - charWidth) {
             val firstLetterBitmap = Bitmap.createBitmap(nameBitmap, nameX, 0, height, height)
-            predictions.add(CharPredictionWithBox(
+            val prediction = CharPredictionWithBox(
                 alphabetDetect.analyze(AlphabetDetect.Input(firstLetterBitmap), Unit),
                 RectF(nameX.toFloat(), 0F, height.toFloat(), height.toFloat())
-            ))
+            )
+            predictions.add(prediction)
             nameX += charWidth / NUM_PREDICTION_STRIDES
         }
 
