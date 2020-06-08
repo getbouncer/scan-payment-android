@@ -83,6 +83,10 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
      * A loader for downloading and loading into memory instances of the [ScreenDetect] model.
      */
     class ModelLoader(context: Context) : ResourceLoader(context) {
+        companion object {
+            const val VERSION = "s48_a_50_char_v4_147_0_94_16"
+        }
+
         override val resource: Int = R.raw.s48_a_50_char_v4_147_0_94_16
     }
 }
