@@ -219,14 +219,11 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         companion object {
             private const val USE_GPU = false
             private const val NUM_THREADS = 2
-            private const val IS_THREAD_SAFE = true
 
             val TRAINED_IMAGE_SIZE = Size(600, 375)
 
             const val NAME = "ssd_ocr"
         }
-
-        override val isThreadSafe: Boolean = IS_THREAD_SAFE
 
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()

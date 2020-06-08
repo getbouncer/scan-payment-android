@@ -67,12 +67,9 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         companion object {
             private const val USE_GPU = false
             private const val NUM_THREADS = 2
-            const val IS_THREAD_SAFE = true
 
             const val NAME = "alphabet_detect"
         }
-
-        override val isThreadSafe: Boolean = IS_THREAD_SAFE
 
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()
