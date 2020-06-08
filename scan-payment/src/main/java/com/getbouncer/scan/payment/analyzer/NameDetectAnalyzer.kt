@@ -252,8 +252,6 @@ class NameDetectAnalyzer private constructor(
         private val ssdObjectDetectFactory: SSDObjectDetect.Factory,
         private val alphabetDetectFactory: AlphabetDetect.Factory
     ) : AnalyzerFactory<NameDetectAnalyzer> {
-        override val isThreadSafe: Boolean = ssdObjectDetectFactory.isThreadSafe && alphabetDetectFactory.isThreadSafe
-
         override suspend fun newInstance(): NameDetectAnalyzer? {
             return NameDetectAnalyzer(
                 ssdObjectDetectFactory.newInstance(),

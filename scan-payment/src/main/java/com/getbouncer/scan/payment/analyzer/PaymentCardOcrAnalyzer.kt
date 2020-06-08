@@ -54,8 +54,6 @@ class PaymentCardOcrAnalyzer private constructor(
         private val ssdOcrFactory: SSDOcr.Factory,
         private val nameDetectFactory: NameDetectAnalyzer.Factory?
     ) : AnalyzerFactory<PaymentCardOcrAnalyzer> {
-        override val isThreadSafe: Boolean = ssdOcrFactory.isThreadSafe && nameDetectFactory?.isThreadSafe ?: true
-
         override suspend fun newInstance(): PaymentCardOcrAnalyzer? = PaymentCardOcrAnalyzer(
             ssdOcrFactory.newInstance(),
             nameDetectFactory?.newInstance()
