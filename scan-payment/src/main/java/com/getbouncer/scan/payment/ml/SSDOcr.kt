@@ -6,25 +6,25 @@ import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ResourceLoader
-import com.getbouncer.scan.framework.crop
-import com.getbouncer.scan.framework.hasOpenGl31
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax2D
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
-import com.getbouncer.scan.framework.scale
-import com.getbouncer.scan.framework.size
-import com.getbouncer.scan.framework.toRGBByteBuffer
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.R
+import com.getbouncer.scan.payment.crop
+import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
 import com.getbouncer.scan.payment.ml.ssd.combinePriors
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.filterVerticalBoxes
 import com.getbouncer.scan.payment.ml.ssd.rearrangeOCRArray
+import com.getbouncer.scan.payment.scale
+import com.getbouncer.scan.payment.size
+import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
@@ -108,33 +108,35 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          *    fields of view are smaller than or the same size as the fullImage's
          * 3. the fullImage and the previewImage have the same orientation
          */
-        fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
+        fun cropImage(input: SSDOcr.Input): Bitmap {
             require(
-                cardFinder.left >= 0 &&
-                    cardFinder.right <= previewImage.width &&
-                    cardFinder.top >= 0 &&
-                    cardFinder.bottom <= previewImage.height
+                input.cardFinder.left >= 0 &&
+                    input.cardFinder.right <= input.previewSize.width &&
+                    input.cardFinder.top >= 0 &&
+                    input.cardFinder.bottom <= input.previewSize.height
             ) { "Card finder is outside preview image bounds" }
 
             // Scale the previewImage to match the fullImage
-            val scaledPreviewImage = previewImage.scaleAndCenterWithin(fullImage)
-            val previewScale = scaledPreviewImage.width().toFloat() / previewImage.width
+            val scaledPreviewImage = input.previewSize.scaleAndCenterWithin(input.fullImage.size())
+            val previewScale = scaledPreviewImage.width().toFloat() / input.previewSize.width
 
             // Scale the cardFinder to match the scaledPreviewImage
             val scaledCardFinder = Rect(
-                (cardFinder.left * previewScale).roundToInt(),
-                (cardFinder.top * previewScale).roundToInt(),
-                (cardFinder.right * previewScale).roundToInt(),
-                (cardFinder.bottom * previewScale).roundToInt()
+                (input.cardFinder.left * previewScale).roundToInt(),
+                (input.cardFinder.top * previewScale).roundToInt(),
+                (input.cardFinder.right * previewScale).roundToInt(),
+                (input.cardFinder.bottom * previewScale).roundToInt()
             )
 
             // Position the scaledCardFinder on the fullImage
-            return Rect(
+            val cropRect = Rect(
                 max(0, scaledCardFinder.left + scaledPreviewImage.left),
                 max(0, scaledCardFinder.top + scaledPreviewImage.top),
-                min(fullImage.width, scaledCardFinder.right + scaledPreviewImage.left),
-                min(fullImage.height, scaledCardFinder.bottom + scaledPreviewImage.top)
+                min(input.fullImage.width, scaledCardFinder.right + scaledPreviewImage.left),
+                min(input.fullImage.height, scaledCardFinder.bottom + scaledPreviewImage.top)
             )
+
+            return input.fullImage.crop(cropRect)
         }
     }
 
@@ -148,20 +150,11 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         1 to arrayOf(FloatArray(NUM_LOC))
     )
 
-    override fun transformData(data: Input): Array<ByteBuffer> {
-        val cardCrop = calculateCrop(
-            data.fullImage.size(),
-            data.previewSize,
-            data.cardFinder
-        )
-
-        return arrayOf(
-            data.fullImage
-                .crop(cardCrop)
-                .scale(Factory.TRAINED_IMAGE_SIZE)
-                .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
-        )
-    }
+    override fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
+        cropImage(data)
+            .scale(Factory.TRAINED_IMAGE_SIZE)
+            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+    )
 
     override fun interpretMLOutput(
         data: Input,
@@ -215,10 +208,14 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     /**
      * A factory for creating instances of the [SSDOcr].
      */
-    class Factory(context: Context, loader: Loader) : TFLAnalyzerFactory<SSDOcr>(loader) {
+    class Factory(
+        context: Context,
+        loader: Loader,
+        threads: Int = DEFAULT_THREADS
+    ) : TFLAnalyzerFactory<SSDOcr>(loader) {
         companion object {
             private const val USE_GPU = false
-            private const val NUM_THREADS = 2
+            private const val DEFAULT_THREADS = 2
 
             val TRAINED_IMAGE_SIZE = Size(600, 375)
 
@@ -228,7 +225,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()
             .setUseNNAPI(USE_GPU && hasOpenGl31(context.applicationContext))
-            .setNumThreads(NUM_THREADS)
+            .setNumThreads(threads)
 
         override suspend fun newInstance(): SSDOcr? = createInterpreter()?.let { SSDOcr(it) }
     }

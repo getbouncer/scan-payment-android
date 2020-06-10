@@ -5,13 +5,13 @@ import android.graphics.Bitmap
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ResourceLoader
-import com.getbouncer.scan.framework.hasOpenGl31
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
-import com.getbouncer.scan.framework.scale
-import com.getbouncer.scan.framework.toRGBByteBuffer
 import com.getbouncer.scan.framework.util.indexOfMax
 import com.getbouncer.scan.payment.R
+import com.getbouncer.scan.payment.hasOpenGl31
+import com.getbouncer.scan.payment.scale
+import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.io.FileNotFoundException
 import java.nio.ByteBuffer
@@ -29,7 +29,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     data class Input(val objDetectionImage: Bitmap)
 
-    data class Prediction(val character: Char, val confidence: Float, val probabilities: FloatArray)
+    data class Prediction(val character: Char, val confidence: Float)
 
     override val name: String = Factory.NAME
 
@@ -45,7 +45,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         }
         val confidence = if (index != null) prediction[index] else 0F
         return Prediction(
-            character, confidence, prediction
+            character, confidence
         )
     }
 
@@ -60,13 +60,17 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     ) = tfInterpreter.run(data, mlOutput)
 
     /**
-     * A factory for creating instances of the [ScreenDetect]. This downloads the model from the
+     * A factory for creating instances of the [AlphabetDetect]. This downloads the model from the
      * web. If unable to download from the web, this will throw a [FileNotFoundException].
      */
-    class Factory(context: Context, loader: Loader) : TFLAnalyzerFactory<AlphabetDetect>(loader) {
+    class Factory(
+        context: Context,
+        loader: Loader,
+        threads: Int = DEFAULT_THREADS
+    ) : TFLAnalyzerFactory<AlphabetDetect>(loader) {
         companion object {
             private const val USE_GPU = false
-            private const val NUM_THREADS = 2
+            private const val DEFAULT_THREADS = 2
 
             const val NAME = "alphabet_detect"
         }
@@ -74,13 +78,13 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
-            .setNumThreads(NUM_THREADS)
+            .setNumThreads(threads)
 
         override suspend fun newInstance(): AlphabetDetect? = createInterpreter()?.let { AlphabetDetect(it) }
     }
 
     /**
-     * A loader for downloading and loading into memory instances of the [ScreenDetect] model.
+     * A loader for downloading and loading into memory instances of the [AlphabetDetect] model.
      */
     class ModelLoader(context: Context) : ResourceLoader(context) {
         companion object {
