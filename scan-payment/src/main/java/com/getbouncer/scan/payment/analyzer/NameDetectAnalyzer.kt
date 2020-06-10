@@ -6,13 +6,12 @@ import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
 import com.getbouncer.scan.framework.ml.ssd.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
-import com.getbouncer.scan.framework.size
 import com.getbouncer.scan.payment.ml.AlphabetDetect
 import com.getbouncer.scan.payment.ml.SSDObjectDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
 import com.getbouncer.scan.payment.ml.scaled
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
-import com.getbouncer.scan.payment.ml.toObjectDetectionCroppedImage
+import com.getbouncer.scan.payment.size
 
 // Some params for how we post process our name detector
 // Number of predictions per predicted character box
@@ -59,7 +58,7 @@ class NameDetectAnalyzer private constructor(
         }
 
         val name = if (nameRect != null) {
-            processPredictions(nameRect, objDetectInput.toObjectDetectionCroppedImage())
+            processPredictions(nameRect, SSDObjectDetect.cropImage(objDetectInput))
         } else {
             null
         }

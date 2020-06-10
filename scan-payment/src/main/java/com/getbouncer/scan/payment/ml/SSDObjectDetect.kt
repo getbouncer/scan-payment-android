@@ -7,23 +7,23 @@ import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ModelWebLoader
-import com.getbouncer.scan.framework.crop
-import com.getbouncer.scan.framework.hasOpenGl31
+import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax2D
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
-import com.getbouncer.scan.framework.scale
-import com.getbouncer.scan.framework.size
-import com.getbouncer.scan.framework.toRGBByteBuffer
 import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
+import com.getbouncer.scan.payment.crop
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.ObjectPriorsGen
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
 import com.getbouncer.scan.payment.ml.ssd.rearrangeObjDetectionArray
+import com.getbouncer.scan.payment.scale
+import com.getbouncer.scan.payment.size
+import com.getbouncer.scan.payment.toRGBByteBuffer
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import kotlin.math.max
@@ -112,14 +112,6 @@ fun calculateCardFinderCoordinatesFromObjectDetection(rect: RectF, previewImage:
     )
 }
 
-fun SSDObjectDetect.Input.toObjectDetectionCroppedImage(): Bitmap = fullImage.crop(
-    SSDObjectDetect.calculateCrop(
-        fullImage.size(),
-        previewSize,
-        cardFinder
-    )
-)
-
 class SSDObjectDetect private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<SSDObjectDetect.Input, Array<ByteBuffer>, SSDObjectDetect.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
 
@@ -158,23 +150,23 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
          * Calculate what portion of the full image should be cropped for object detection based on
          * the position of card finder within the preview image.
          */
-        fun calculateCrop(fullImage: Size, previewImage: Size, cardFinder: Rect): Rect {
+        private fun calculateImageCrop(data: Input): Rect {
             require(
-                cardFinder.left >= 0 &&
-                    cardFinder.right <= previewImage.width &&
-                    cardFinder.top >= 0 &&
-                    cardFinder.bottom <= previewImage.height
+                data.cardFinder.left >= 0 &&
+                        data.cardFinder.right <= data.previewSize.width &&
+                        data.cardFinder.top >= 0 &&
+                        data.cardFinder.bottom <= data.previewSize.height
             ) { "Card finder is outside preview image bounds" }
 
             // Calculate the object detection square based on the card finder, limited by the preview
             val objectDetectionSquare =
                 calculateObjectDetectionFromCardFinder(
-                    previewImage,
-                    cardFinder
+                    data.previewSize,
+                    data.cardFinder
                 )
 
-            val scaledPreviewImage = previewImage.scaleAndCenterWithin(fullImage)
-            val previewScale = scaledPreviewImage.width().toFloat() / previewImage.width
+            val scaledPreviewImage = data.previewSize.scaleAndCenterWithin(data.fullImage.size())
+            val previewScale = scaledPreviewImage.width().toFloat() / data.previewSize.width
 
             // Scale the objectDetectionSquare to match the scaledPreviewImage
             val scaledObjectDetectionSquare = Rect(
@@ -188,10 +180,16 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
             return Rect(
                 max(0, scaledObjectDetectionSquare.left + scaledPreviewImage.left),
                 max(0, scaledObjectDetectionSquare.top + scaledPreviewImage.top),
-                min(fullImage.width, scaledObjectDetectionSquare.right + scaledPreviewImage.left),
-                min(fullImage.height, scaledObjectDetectionSquare.bottom + scaledPreviewImage.top)
+                min(data.fullImage.width, scaledObjectDetectionSquare.right + scaledPreviewImage.left),
+                min(data.fullImage.height, scaledObjectDetectionSquare.bottom + scaledPreviewImage.top)
             )
         }
+
+        /**
+         * Calculate what portion of the full image should be cropped for object detection based on
+         * the position of card finder within the preview image.
+         */
+        fun cropImage(data: Input): Bitmap = data.fullImage.crop(calculateImageCrop(data))
     }
 
     /**
@@ -223,19 +221,11 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
         1 to arrayOf(FloatArray(NUM_LOC))
     )
 
-    override fun transformData(data: Input): Array<ByteBuffer> =
-        arrayOf(
-            data.fullImage
-                .crop(
-                    calculateCrop(
-                        data.fullImage.size(),
-                        data.previewSize,
-                        data.cardFinder
-                    )
-                )
-                .scale(TRAINED_IMAGE_SIZE)
-                .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
-        )
+    override fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
+        cropImage(data)
+            .scale(TRAINED_IMAGE_SIZE)
+            .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
+    )
 
     override fun interpretMLOutput(
         data: Input,
@@ -276,11 +266,7 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
 
         return Prediction(
             detectionBoxes = detectionBoxes,
-            objectDetectionImageSize = calculateCrop(
-                data.fullImage.size(),
-                data.previewSize,
-                data.cardFinder
-            ).size(),
+            objectDetectionImageSize = calculateImageCrop(data).size(),
             iin = data.iin
         )
     }
@@ -295,10 +281,14 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
      * A factory for creating instances of the [SSDObjectDetect]. This downloads the model from the
      * web. If unable to download from the web, this will return null.
      */
-    class Factory(context: Context, loader: Loader) : TFLAnalyzerFactory<SSDObjectDetect>(loader) {
+    class Factory(
+        context: Context,
+        loader: Loader,
+        threads: Int = DEFAULT_THREADS
+    ) : TFLAnalyzerFactory<SSDObjectDetect>(loader) {
         companion object {
             private const val USE_GPU = false
-            private const val NUM_THREADS = 2
+            private const val DEFAULT_THREADS = 2
 
             const val NAME = "ssd_object_detect"
         }
@@ -306,7 +296,7 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
-            .setNumThreads(NUM_THREADS)
+            .setNumThreads(threads)
 
         override suspend fun newInstance(): SSDObjectDetect? = createInterpreter()?.let { SSDObjectDetect(it) }
     }
