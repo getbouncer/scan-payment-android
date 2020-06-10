@@ -7,7 +7,6 @@ import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ModelWebLoader
-import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
@@ -17,6 +16,7 @@ import com.getbouncer.scan.framework.util.maxAspectRatioInSize
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.crop
+import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.ObjectPriorsGen
 import com.getbouncer.scan.payment.ml.ssd.extractPredictions
@@ -153,17 +153,16 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
         private fun calculateImageCrop(data: Input): Rect {
             require(
                 data.cardFinder.left >= 0 &&
-                        data.cardFinder.right <= data.previewSize.width &&
-                        data.cardFinder.top >= 0 &&
-                        data.cardFinder.bottom <= data.previewSize.height
+                    data.cardFinder.right <= data.previewSize.width &&
+                    data.cardFinder.top >= 0 &&
+                    data.cardFinder.bottom <= data.previewSize.height
             ) { "Card finder is outside preview image bounds" }
 
             // Calculate the object detection square based on the card finder, limited by the preview
-            val objectDetectionSquare =
-                calculateObjectDetectionFromCardFinder(
-                    data.previewSize,
-                    data.cardFinder
-                )
+            val objectDetectionSquare = calculateObjectDetectionFromCardFinder(
+                data.previewSize,
+                data.cardFinder
+            )
 
             val scaledPreviewImage = data.previewSize.scaleAndCenterWithin(data.fullImage.size())
             val previewScale = scaledPreviewImage.width().toFloat() / data.previewSize.width

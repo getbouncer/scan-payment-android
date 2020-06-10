@@ -6,7 +6,6 @@ import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ResourceLoader
-import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
@@ -16,6 +15,7 @@ import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.R
 import com.getbouncer.scan.payment.crop
+import com.getbouncer.scan.payment.hasOpenGl31
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.ssd.OcrFeatureMapSizes
 import com.getbouncer.scan.payment.ml.ssd.combinePriors
