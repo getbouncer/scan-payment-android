@@ -240,12 +240,4 @@ class SSDOcr private constructor(interpreter: Interpreter) :
 
         override val resource: Int = R.raw.darknite
     }
-
-    class ModelLoaderFast(context: Context) : ResourceLoader(context) {
-        companion object {
-            const val VERSION = "ssd0125l593"
-        }
-
-        override val resource: Int = R.raw.ssd0125l593
-    }
 }
