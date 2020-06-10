@@ -5,7 +5,7 @@ import android.util.Size
 import androidx.core.graphics.drawable.toBitmap
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.getbouncer.scan.framework.size
+import com.getbouncer.scan.payment.size
 import com.getbouncer.scan.payment.test.R
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
