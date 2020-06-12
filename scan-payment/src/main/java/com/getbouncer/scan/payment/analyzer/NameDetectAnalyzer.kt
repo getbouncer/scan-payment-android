@@ -57,11 +57,7 @@ class NameDetectAnalyzer private constructor(
             }
         }
 
-        val name = if (nameRect != null) {
-            processPredictions(nameRect, SSDObjectDetect.cropImage(objDetectInput))
-        } else {
-            null
-        }
+        val name = nameRect?.let { processPredictions(it, SSDObjectDetect.cropImage(objDetectInput)) }
         Output(name, output.detectionBoxes)
     }
 
