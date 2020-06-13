@@ -11,6 +11,7 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
 import com.getbouncer.scan.framework.ml.ssd.softMax2D
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
+import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.util.reshape
 import com.getbouncer.scan.framework.util.scaleAndCenterWithin
 import com.getbouncer.scan.payment.R
@@ -94,7 +95,7 @@ private val PRIORS = combinePriors()
 class SSDOcr private constructor(interpreter: Interpreter) :
     TensorFlowLiteAnalyzer<SSDOcr.Input, Array<ByteBuffer>, SSDOcr.Prediction, Map<Int, Array<FloatArray>>>(interpreter) {
 
-    data class Input(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect)
+    data class Input(val fullImage: Bitmap, val previewSize: Size, val cardFinder: Rect, val capturedAt: ClockMark)
 
     data class Prediction(val pan: String, val detectedBoxes: List<DetectionBox>)
 
@@ -108,7 +109,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
          *    fields of view are smaller than or the same size as the fullImage's
          * 3. the fullImage and the previewImage have the same orientation
          */
-        fun cropImage(input: SSDOcr.Input): Bitmap {
+        fun cropImage(input: Input): Bitmap {
             require(
                 input.cardFinder.left >= 0 &&
                     input.cardFinder.right <= input.previewSize.width &&
