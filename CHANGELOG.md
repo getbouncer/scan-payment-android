@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0012](https://github.com/getbouncer/scan-payment-android/tree/2.0.0012) (2020-06-15)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0011...2.0.0012)
+
+**Merged pull requests:**
+
+- Add timing to ssdocr input [\#29](https://github.com/getbouncer/scan-payment-android/pull/29) ([awushensky](https://github.com/awushensky))
+- Relocate test resources [\#28](https://github.com/getbouncer/scan-payment-android/pull/28) ([awushensky](https://github.com/awushensky))
+- Relocate image manipulation utilities [\#27](https://github.com/getbouncer/scan-payment-android/pull/27) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0011](https://github.com/getbouncer/scan-payment-android/tree/2.0.0011) (2020-06-08)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0010...2.0.0011)
