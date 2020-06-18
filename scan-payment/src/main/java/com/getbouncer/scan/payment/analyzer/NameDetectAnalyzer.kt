@@ -2,63 +2,107 @@ package com.getbouncer.scan.payment.analyzer
 
 import android.graphics.Bitmap
 import android.graphics.RectF
+import android.util.Log
 import com.getbouncer.scan.framework.Analyzer
 import com.getbouncer.scan.framework.AnalyzerFactory
-import com.getbouncer.scan.framework.ml.ssd.hardNonMaximumSuppression
+import com.getbouncer.scan.framework.Config
+import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
+import com.getbouncer.scan.framework.util.centerScaled
+import com.getbouncer.scan.framework.util.scaled
 import com.getbouncer.scan.payment.ml.AlphabetDetect
-import com.getbouncer.scan.payment.ml.SSDObjectDetect
+import com.getbouncer.scan.payment.ml.ExpiryDetect
 import com.getbouncer.scan.payment.ml.SSDOcr
-import com.getbouncer.scan.payment.ml.scaled
+import com.getbouncer.scan.payment.ml.TextDetector
+import com.getbouncer.scan.payment.ml.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.size
+import kotlin.math.max
+import kotlin.math.min
 
 // Some params for how we post process our name detector
 // Number of predictions per predicted character box
 private const val NUM_PREDICTION_STRIDES = 10
 private const val NMS_THRESHOLD = 0.85F
-private const val CHAR_CONFIDENCE_THRESHOLD = 0.6
+private const val CHAR_CONFIDENCE_THRESHOLD = 0.5
 
-class NameDetectAnalyzer private constructor(
-    private val ssdObjectDetect: SSDObjectDetect?,
-    private val alphabetDetect: AlphabetDetect?
-) : Analyzer<SSDOcr.Input, PaymentCardOcrState, NameDetectAnalyzer.Output> {
+private const val NAME_BOX_X_SCALE_RATIO = 1.2F
+private const val NAME_BOX_Y_SCALE_RATIO = 1.4F
+
+private const val EXPIRY_BOX_X_SCALE_RATIO = 1.1F
+private const val EXPIRY_BOX_Y_SCALE_RATIO = 1.2F
+
+class NameAndExpiryAnalyzer private constructor(
+    private val textDetector: TextDetector?,
+    private val alphabetDetect: AlphabetDetect?,
+    private val expiryDetect: ExpiryDetect? = null
+) : Analyzer<SSDOcr.Input, PaymentCardOcrState, NameAndExpiryAnalyzer.Output> {
 
     data class Output(
         val name: String?,
-        val boxes: List<DetectionBox>?
+        val boxes: List<DetectionBox>?,
+        val expiry: ExpiryDetect.Expiry?
     )
 
-    fun isAvailable() = ssdObjectDetect != null
+    fun isAvailable() = textDetector != null
 
     override val name: String = "name_detect_analyzer"
 
     override suspend fun analyze(
         data: SSDOcr.Input,
         state: PaymentCardOcrState
-    ) = if (!state.runNameExtraction || ssdObjectDetect == null || alphabetDetect == null) {
-        Output("", null)
+    ) = if ((!state.runNameExtraction && !state.runExpiryExtraction) || textDetector == null || alphabetDetect == null) {
+        Output(null, null, null)
     } else {
-        val objDetectInput = SSDObjectDetect.Input(
-            fullImage = data.fullImage,
-            previewSize = data.previewSize,
-            cardFinder = data.cardFinder,
-            iin = null
+        val objDetectBitmap = cropImageForObjectDetect(
+            data.fullImage,
+            data.previewSize,
+            data.cardFinder
         )
 
-        val output = ssdObjectDetect.analyze(objDetectInput, Unit)
-        var nameRect: RectF? = null
-
-        // check to see if we detected a name. If so, run our name extraction model, serially for now
-        for (box in output.detectionBoxes) {
-            if (box.label == SSDObjectDetect.Labels.NAME.ordinal) {
-                nameRect = box.rect
-                break
-            }
+        val textDetectorPrediction = textDetector.analyze(
+            TextDetector.Input(
+                data.fullImage,
+                data.previewSize,
+                data.cardFinder
+            ),
+            Unit
+        )
+        val expiry = if (state.runExpiryExtraction && textDetectorPrediction.expiryBox != null) {
+            expiryDetect?.analyze(
+                ExpiryDetect.Input(
+                    objDetectBitmap,
+                    // the boxes produced by textDetector are sometimes too tight, especially in the Y
+                    // direction. Scale it out a bit
+                    textDetectorPrediction.expiryBox.rect.centerScaled(
+                        EXPIRY_BOX_X_SCALE_RATIO,
+                        EXPIRY_BOX_Y_SCALE_RATIO
+                    )
+                ),
+                Unit
+            )?.expiry
+        } else {
+            null
         }
 
-        val name = nameRect?.let { processPredictions(it, SSDObjectDetect.cropImage(objDetectInput)) }
-        Output(name, output.detectionBoxes)
+        val name = if (state.runNameExtraction) {
+            val words = textDetectorPrediction.nameBoxes.mapNotNull { box ->
+                // the boxes produced by textDetector are sometimes too tight, especially in the Y
+                // direction. Scale it out a bit
+                processNamePredictions(
+                    box.rect.centerScaled(
+                        NAME_BOX_X_SCALE_RATIO,
+                        NAME_BOX_Y_SCALE_RATIO
+                    ),
+                    objDetectBitmap
+                )?.filter { it != ' ' }
+            }
+            words.joinToString(" ").trim().ifEmpty { null }
+        } else {
+            null
+        }
+
+        Output(name, textDetectorPrediction.allObjects, expiry)
     }
 
     internal class CharPredictionWithBox(
@@ -73,7 +117,7 @@ class NameDetectAnalyzer private constructor(
         )
     }
 
-    private suspend fun processPredictions(
+    private suspend fun processNamePredictions(
         nameRect: RectF,
         bitmapForObjectDetection: Bitmap
     ): String? {
@@ -92,8 +136,13 @@ class NameDetectAnalyzer private constructor(
         val charWidth = height
 
         // We adjust the start and end of the name bounding box to better capture the first char
-        val xStart = Math.max(0, x - charWidth / 2)
-        val nameWidth = Math.min(bitmapForObjectDetection.width - xStart, width + charWidth)
+        val xStart = max(0, x - charWidth / 4)
+        val nameWidth = min(bitmapForObjectDetection.width - xStart, width + charWidth / 2)
+
+        if (y < 0 || height < 0 || y + height > bitmapForObjectDetection.height || xStart + nameWidth > bitmapForObjectDetection.width) {
+            Log.w(Config.logTag, "$name Invalid name dimensions. height=$height, y=$y")
+            return null
+        }
 
         val nameBitmap = Bitmap.createBitmap(bitmapForObjectDetection, xStart, y, nameWidth, height)
         val predictions: MutableList<CharPredictionWithBox> = ArrayList()
@@ -118,12 +167,13 @@ class NameDetectAnalyzer private constructor(
             ) to it.characterPrediction.confidence
         }.unzip()
 
-        val indices: List<Int> = hardNonMaximumSuppression(
-            boxes.toTypedArray(),
-            probabilities.toFloatArray(),
-            NMS_THRESHOLD,
-            limit = 0
-        )
+        val indices: List<Int> =
+            hardNonMaximumSuppression(
+                boxes.toTypedArray(),
+                probabilities.toFloatArray(),
+                NMS_THRESHOLD,
+                limit = 0
+            )
         return processNMSResults(predictions.filterIndexed { index, _ -> indices.contains(index) })
     }
 
@@ -244,13 +294,15 @@ class NameDetectAnalyzer private constructor(
     }
 
     class Factory(
-        private val ssdObjectDetectFactory: SSDObjectDetect.Factory,
-        private val alphabetDetectFactory: AlphabetDetect.Factory
-    ) : AnalyzerFactory<NameDetectAnalyzer> {
-        override suspend fun newInstance(): NameDetectAnalyzer? {
-            return NameDetectAnalyzer(
-                ssdObjectDetectFactory.newInstance(),
-                alphabetDetectFactory.newInstance()
+        private val textDetectorFactory: TextDetector.Factory,
+        private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
+        private val expiryDetectFactory: ExpiryDetect.Factory? = null
+    ) : AnalyzerFactory<NameAndExpiryAnalyzer> {
+        override suspend fun newInstance(): NameAndExpiryAnalyzer? {
+            return NameAndExpiryAnalyzer(
+                textDetectorFactory.newInstance(),
+                alphabetDetectFactory?.newInstance(),
+                expiryDetectFactory?.newInstance()
             )
         }
     }

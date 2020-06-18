@@ -10,7 +10,7 @@ import org.junit.Test
 import java.io.File
 import kotlin.test.assertNotNull
 
-class SSDObjectDetectTest {
+class TextDetectorTest {
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
     @Before
@@ -33,8 +33,8 @@ class SSDObjectDetectTest {
     @Test
     @SmallTest
     fun objectDetect_createsInterpreter() = runBlocking {
-        val loader = SSDObjectDetect.ModelLoader(testContext)
-        val factory = SSDObjectDetect.Factory(testContext, loader)
+        val loader = TextDetector.ModelLoader(testContext)
+        val factory = TextDetector.Factory(testContext, loader)
 
         val localFileName = loader.url.path.replace('/', '_')
         val localFile = File(testContext.cacheDir, localFileName)

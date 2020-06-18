@@ -1,8 +1,8 @@
 package com.getbouncer.scan.payment.ml.ssd
 
+import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.ClassifierScores
 import com.getbouncer.scan.framework.ml.ssd.RectForm
-import com.getbouncer.scan.framework.ml.ssd.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.toRectF
 import com.getbouncer.scan.framework.util.filterByIndexes
 import com.getbouncer.scan.framework.util.filteredIndexes
@@ -133,52 +133,4 @@ fun filterVerticalBoxes(detectedBoxes: List<DetectionBox>): List<DetectionBox> {
     val medianHeight = heights.elementAt(heights.size / 2)
 
     return detectedBoxes.filter { abs(it.rect.centerY() - medianCenter) <= medianHeight }
-}
-
-/**
- * The model outputs a particular location or a particular class of each prior before moving
- * on to the next prior. For instance, the model will output probabilities for background
- * class corresponding to all priors before outputting the probability of next class for the
- * first prior. This method serves to rearrange the output if you are using outputs from
- * multiple layers If you use outputs from single layer use the method defined above
- *
- * TODO: simplify this
- */
-fun rearrangeObjDetectionArray(
-    locations: Array<FloatArray>,
-    featureMapSizes: IntArray,
-    numberOfPriors: Int,
-    locationsPerPrior: Int
-): Array<FloatArray> {
-    val totalLocationsForAllLayers = featureMapSizes.map { it * it * numberOfPriors * locationsPerPrior }.sum()
-    val rearranged = FloatArray(totalLocationsForAllLayers)
-
-    var offset = 0
-
-    for (steps in featureMapSizes) {
-        val totalNumberOfLocationsForThisLayer = steps * steps * numberOfPriors * locationsPerPrior
-        val stepsForLoop = steps - 1
-        var j: Int
-        var i = 0
-        var step = 0
-
-        while (i < totalNumberOfLocationsForThisLayer) {
-            while (step < steps) {
-
-                j = step
-
-                while (j < totalNumberOfLocationsForThisLayer - stepsForLoop + step) {
-                    rearranged[offset + i] = locations[0][offset + j]
-                    i++
-                    j += steps
-                }
-
-                step++
-            }
-
-            offset += totalNumberOfLocationsForThisLayer
-        }
-    }
-
-    return arrayOf(rearranged)
 }

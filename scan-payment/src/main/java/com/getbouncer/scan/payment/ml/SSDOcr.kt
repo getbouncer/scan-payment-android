@@ -9,7 +9,7 @@ import com.getbouncer.scan.framework.ResourceLoader
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
-import com.getbouncer.scan.framework.ml.ssd.softMax2D
+import com.getbouncer.scan.framework.ml.ssd.softMax
 import com.getbouncer.scan.framework.ml.ssd.toRectForm
 import com.getbouncer.scan.framework.time.ClockMark
 import com.getbouncer.scan.framework.util.reshape
@@ -183,7 +183,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
             locationsPerPrior = NUM_OF_CLASSES
         ).reshape(NUM_OF_CLASSES)
-        scores.forEach { it.softMax2D() }
+        scores.forEach { it.softMax() }
 
         val detectedBoxes = filterVerticalBoxes(
             extractPredictions(
