@@ -215,18 +215,18 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
     /**
      * The model reshapes all the data to 1 x [All Data Points]
      */
-    override fun buildEmptyMLOutput(): Map<Int, Array<FloatArray>> = mapOf(
+    override suspend fun buildEmptyMLOutput(): Map<Int, Array<FloatArray>> = mapOf(
         0 to arrayOf(FloatArray(NUM_CLASS)),
         1 to arrayOf(FloatArray(NUM_LOC))
     )
 
-    override fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
         cropImage(data)
             .scale(TRAINED_IMAGE_SIZE)
             .toRGBByteBuffer(mean = IMAGE_MEAN, std = IMAGE_STD)
     )
 
-    override fun interpretMLOutput(
+    override suspend fun interpretMLOutput(
         data: Input,
         mlOutput: Map<Int, Array<FloatArray>>
     ): Prediction {
@@ -270,7 +270,7 @@ class SSDObjectDetect private constructor(interpreter: Interpreter) :
         )
     }
 
-    override fun executeInference(
+    override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: Array<ByteBuffer>,
         mlOutput: Map<Int, Array<FloatArray>>

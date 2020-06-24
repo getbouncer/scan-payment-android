@@ -4,12 +4,15 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ConfigurationInfo
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.Size
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
 import kotlin.math.roundToInt
+import com.getbouncer.scan.framework.util.size
+import kotlinx.coroutines.*
 
 private const val DIM_PIXEL_SIZE = 3
 private const val NUM_BYTES_PER_CHANNEL = 4 // Float.size / Byte.size
@@ -79,6 +82,102 @@ fun hasOpenGl31(context: Context): Boolean {
     } else {
         false
     }
+}
+
+/**
+ * Fragments the image into multiple segments and places them in new segments. The operations on the
+ * image are run in parallel.
+ */
+suspend fun Bitmap.fragment(fromSegments: Array<Rect>,
+                            toSegments: Array<Rect>,
+                            toSize: Size): Bitmap {
+    require(fromSegments.size == toSegments.size) {
+        "Number of source segments does not match number of destination segments"
+    }
+
+    val current = this
+    val result = Bitmap.createBitmap(toSize.width, toSize.height, this.config)
+    val canvas = Canvas(result)
+
+    coroutineScope {
+        (0 until fromSegments.size).map {
+            async {
+                val image = current.crop(fromSegments[it]).transform(toSegments[it].size())
+                canvas.drawBitmap(
+                    image,
+                    toSegments[it].left.toFloat(),
+                    toSegments[it].top.toFloat(),
+                    null
+                )
+            }
+        }.awaitAll()
+    }
+
+    return result
+}
+
+/**
+ * Hard-codes data points for the zoomed image model
+ */
+suspend fun Bitmap.zoom(): Bitmap {
+    val fromSegments = arrayOf<Rect>(
+        Rect(0,
+            0,
+            (this.width / 2) - 112,
+            (this.height / 2) - 112),
+        Rect((this.width / 2) - 112,
+            0,
+            (this.width / 2) + 112,
+            this.height /2 - 112),
+        Rect((this.width / 2) + 112,
+            0,
+            this.width,
+            (this.height / 2) - 112),
+        Rect(0,
+            (this.height / 2) - 112,
+            (this.width / 2) - 112,
+            (this.height / 2) + 112),
+        Rect((this.width / 2) - 112,
+            (this.height / 2) - 112,
+            (this.width / 2) + 112,
+            (this.height / 2) + 112),
+        Rect((this.width / 2) + 112,
+            (this.height / 2) - 112,
+            this.width,
+            (this.height / 2) + 112),
+        Rect(0,
+            (this.height / 2) + 112,
+            (this.width / 2) - 112,
+            this.height),
+        Rect((this.width / 2) - 112,
+            (this.height / 2) + 112,
+            (this.width / 2) + 112,
+            this.height),
+        Rect((this.width / 2) + 112,
+            (this.height / 2) + 112,
+            this.width,
+            this.height))
+    val toSegments = arrayOf<Rect>(
+        Rect(0, 0, 112, 112),
+        Rect(112, 0, 336, 112),
+        Rect(336, 0, 448, 112),
+        Rect(0, 112, 112, 336),
+        Rect(112, 112, 336, 336),
+        Rect(336, 112, 448, 336),
+        Rect(0, 336, 112, 448),
+        Rect(112, 336, 336, 448),
+        Rect( 336, 336, 448, 448))
+    val toSize = Size(448, 448)
+
+    return this.fragment(fromSegments, toSegments, toSize)
+}
+
+/**
+ * Stretches, or squeezes a bitmap to fit a new size
+ */
+fun Bitmap.transform(scale: Size): Bitmap {
+    require(scale.width > 0 && scale.height > 0) { "Cannot use negative dimensions"}
+    return Bitmap.createScaledBitmap(this, scale.width, scale.height, false)
 }
 
 /**
