@@ -81,7 +81,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
     data class Prediction(
         val allObjects: List<DetectionBox>,
         val nameBoxes: List<DetectionBox>,
-        val expiryBox: DetectionBox?
+        val expiryBoxes: List<DetectionBox>
     )
 
     private data class MergedBox(val box: DetectionBox, val subBoxes: List<DetectionBox>)
@@ -171,7 +171,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
         return Prediction(
             allObjects,
             nameBoxes?.subBoxes ?: emptyList(),
-            outputBoxes.filter { it.label == LABELS.EXPIRATION_DATE.ordinal }.maxBy { it.confidence }
+            outputBoxes.filter { it.label == LABELS.EXPIRATION_DATE.ordinal }.sortedByDescending { it.confidence }.take(2)
         )
     }
 
