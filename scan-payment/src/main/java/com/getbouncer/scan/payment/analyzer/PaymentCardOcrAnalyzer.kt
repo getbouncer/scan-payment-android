@@ -55,9 +55,9 @@ class PaymentCardOcrAnalyzer private constructor(
         private val ssdOcrFactory: SSDOcr.Factory,
         private val nameDetectFactory: NameAndExpiryAnalyzer.Factory?
     ) : AnalyzerFactory<PaymentCardOcrAnalyzer> {
-        override suspend fun newInstance(): PaymentCardOcrAnalyzer? = PaymentCardOcrAnalyzer(
-            ssdOcrFactory.newInstance(),
-            nameDetectFactory?.newInstance()
+        override suspend fun newInstance(criticalPath: Boolean): PaymentCardOcrAnalyzer? = PaymentCardOcrAnalyzer(
+            ssdOcrFactory.newInstance(criticalPath),
+            nameDetectFactory?.newInstance(criticalPath)
         )
     }
 }

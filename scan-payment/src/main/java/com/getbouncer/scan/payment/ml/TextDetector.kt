@@ -8,7 +8,7 @@ import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.Loader
-import com.getbouncer.scan.framework.ModelWebLoader
+import com.getbouncer.scan.framework.SignedUrlModelWebLoader
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
@@ -374,7 +374,6 @@ class TextDetector private constructor(interpreter: Interpreter) :
         companion object {
             private const val USE_GPU = false
             private const val NUM_THREADS = 2
-            const val IS_THREAD_SAFE = true
 
             const val NAME = "text_detect"
         }
@@ -384,13 +383,13 @@ class TextDetector private constructor(interpreter: Interpreter) :
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
             .setNumThreads(NUM_THREADS)
 
-        override suspend fun newInstance(): TextDetector? = createInterpreter()?.let { TextDetector(it) }
+        override suspend fun newInstance(criticalPath: Boolean): TextDetector? = createInterpreter(criticalPath)?.let { TextDetector(it) }
     }
 
     /**
      * A loader for downloading and loading into memory instances of the [TextDetector] model.
      */
-    class ModelLoader(context: Context) : ModelWebLoader(context) {
+    class ModelLoader(context: Context) : SignedUrlModelWebLoader(context) {
         companion object {
             const val VERSION = "20.16"
         }
@@ -399,5 +398,6 @@ class TextDetector private constructor(interpreter: Interpreter) :
         override val modelVersion: String = VERSION
         override val modelFileName: String = "dlnm.tflite"
         override val hash: String = "c84564bf856358fbb2995c962ef5dd4a892dcaa593b61bf540324475db26afef"
+        override val hashAlgorithm: String = "SHA-256"
     }
 }

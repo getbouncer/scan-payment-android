@@ -11,6 +11,7 @@ import java.io.File
 import kotlin.test.assertNotNull
 
 class TextDetectorTest {
+
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
     @Before

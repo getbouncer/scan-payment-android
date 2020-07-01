@@ -80,7 +80,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
             .setNumThreads(threads)
 
-        override suspend fun newInstance(): AlphabetDetect? = createInterpreter()?.let { AlphabetDetect(it) }
+        override suspend fun newInstance(criticalPath: Boolean): AlphabetDetect? = createInterpreter(criticalPath)?.let { AlphabetDetect(it) }
     }
 
     /**

@@ -6,6 +6,7 @@ import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.Loader
 import com.getbouncer.scan.framework.ResourceLoader
+import com.getbouncer.scan.framework.UpdatingResourceLoader
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
@@ -228,17 +229,19 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             .setUseNNAPI(USE_GPU && hasOpenGl31(context.applicationContext))
             .setNumThreads(threads)
 
-        override suspend fun newInstance(): SSDOcr? = createInterpreter()?.let { SSDOcr(it) }
+        override suspend fun newInstance(criticalPath: Boolean): SSDOcr? = createInterpreter(criticalPath)?.let { SSDOcr(it) }
     }
 
     /**
      * A loader for loading the model into memory
      */
-    class ModelLoader(context: Context) : ResourceLoader(context) {
+    class ModelLoader(context: Context) : UpdatingResourceLoader(context) {
         companion object {
             const val VERSION = "darknite"
         }
 
         override val resource: Int = R.raw.darknite
+        override val modelFrameworkVersion: Int = 1
+        override val modelClass: String = "ssdocr"
     }
 }

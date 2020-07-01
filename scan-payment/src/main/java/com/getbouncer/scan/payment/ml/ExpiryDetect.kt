@@ -132,7 +132,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
             .setNumThreads(NUM_THREADS)
 
-        override suspend fun newInstance(): ExpiryDetect? = createInterpreter()?.let { ExpiryDetect(it) }
+        override suspend fun newInstance(criticalPath: Boolean): ExpiryDetect? = createInterpreter(criticalPath)?.let { ExpiryDetect(it) }
     }
 
     /**

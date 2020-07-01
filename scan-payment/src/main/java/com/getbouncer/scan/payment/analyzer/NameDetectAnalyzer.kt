@@ -302,11 +302,11 @@ class NameAndExpiryAnalyzer private constructor(
         private val alphabetDetectFactory: AlphabetDetect.Factory? = null,
         private val expiryDetectFactory: ExpiryDetect.Factory? = null
     ) : AnalyzerFactory<NameAndExpiryAnalyzer> {
-        override suspend fun newInstance(): NameAndExpiryAnalyzer? {
+        override suspend fun newInstance(criticalPath: Boolean): NameAndExpiryAnalyzer? {
             return NameAndExpiryAnalyzer(
-                textDetectorFactory.newInstance(),
-                alphabetDetectFactory?.newInstance(),
-                expiryDetectFactory?.newInstance()
+                textDetectorFactory.newInstance(criticalPath),
+                alphabetDetectFactory?.newInstance(criticalPath),
+                expiryDetectFactory?.newInstance(criticalPath)
             )
         }
     }
