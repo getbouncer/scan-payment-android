@@ -53,7 +53,7 @@ fun formatExpiry(day: String?, month: String, year: String): String {
     return "$formattedDay${formatExpiryMonth(month)}/${formatExpiryYear(year)}"
 }
 
-private fun isValidMonth(month: Int) = month in 1..12
+fun isValidMonth(month: Int) = month in 1..12
 
 /**
  * Determine if the day
