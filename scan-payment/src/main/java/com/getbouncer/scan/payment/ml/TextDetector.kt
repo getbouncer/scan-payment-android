@@ -88,7 +88,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
 
     override val name: String = Factory.NAME
 
-    override fun buildEmptyMLOutput() = mapOf(
+    override suspend fun buildEmptyMLOutput() = mapOf(
         0 to arrayOf(
             Array(LAYER_1_SIZE.width) {
                 Array(LAYER_1_SIZE.height) {
@@ -141,7 +141,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
         return results
     }
 
-    override fun interpretMLOutput(
+    override suspend fun interpretMLOutput(
         data: Input,
         mlOutput: Map<Int, Array<Array<Array<FloatArray>>>>
     ): Prediction {
@@ -354,13 +354,13 @@ class TextDetector private constructor(interpreter: Interpreter) :
         return nameWidthScore
     }
 
-    override fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
+    override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
         cropImageForObjectDetect(data.fullImage, data.previewSize, data.cardFinder)
             .scale(TRAINED_IMAGE_SIZE)
             .toRGBByteBuffer()
     )
 
-    override fun executeInference(
+    override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: Array<ByteBuffer>,
         mlOutput: Map<Int, Array<Array<Array<FloatArray>>>>

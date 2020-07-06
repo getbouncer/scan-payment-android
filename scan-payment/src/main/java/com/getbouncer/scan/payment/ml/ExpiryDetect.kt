@@ -57,9 +57,9 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     override val name: String = Factory.NAME
 
-    override fun buildEmptyMLOutput() = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
+    override suspend fun buildEmptyMLOutput() = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
 
-    override fun interpretMLOutput(data: Input, mlOutput: Array<Array<Array<FloatArray>>>): Prediction {
+    override suspend fun interpretMLOutput(data: Input, mlOutput: Array<Array<Array<FloatArray>>>): Prediction {
         val output = mlOutput[0][0].mapNotNull {
             it.indexOfMax()?.let { maxIndex ->
                 Digit(maxIndex, it[maxIndex])
@@ -91,7 +91,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
         }
     }
 
-    override fun transformData(data: Input): ByteBuffer {
+    override suspend fun transformData(data: Input): ByteBuffer {
         val targetAspectRatio = ASPECT_RATIO
         val scaledRect = data.expiryBox.scaled(data.image.size())
         val scaledExpRectNewHeight = scaledRect.width() * targetAspectRatio
@@ -109,7 +109,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
             .toRGBByteBuffer()
     }
 
-    override fun executeInference(
+    override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: ByteBuffer,
         mlOutput: Array<Array<Array<FloatArray>>>
