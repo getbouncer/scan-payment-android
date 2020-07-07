@@ -68,19 +68,23 @@ class NameAndExpiryAnalyzer private constructor(
             ),
             Unit
         )
-        val expiry = if (state.runExpiryExtraction && textDetectorPrediction.expiryBox != null) {
-            expiryDetect?.analyze(
-                ExpiryDetect.Input(
-                    objDetectBitmap,
-                    // the boxes produced by textDetector are sometimes too tight, especially in the Y
-                    // direction. Scale it out a bit
-                    textDetectorPrediction.expiryBox.rect.centerScaled(
-                        EXPIRY_BOX_X_SCALE_RATIO,
-                        EXPIRY_BOX_Y_SCALE_RATIO
-                    )
-                ),
-                Unit
-            )?.expiry
+        val expiry = if (state.runExpiryExtraction && textDetectorPrediction.expiryBoxes.isNotEmpty()) {
+            // pick the expiry box by oldest date
+            val parsedExpiries = textDetectorPrediction.expiryBoxes.mapNotNull { box ->
+                expiryDetect?.analyze(
+                    ExpiryDetect.Input(
+                        objDetectBitmap,
+                        // the boxes produced by textDetector are sometimes too tight, especially in the Y
+                        // direction. Scale it out a bit
+                        box.rect.centerScaled(
+                            EXPIRY_BOX_X_SCALE_RATIO,
+                            EXPIRY_BOX_Y_SCALE_RATIO
+                        )
+                    ),
+                    Unit
+                )?.expiry
+            }.sortedByDescending { it.year * 100 + it.month }
+            parsedExpiries.firstOrNull()
         } else {
             null
         }
