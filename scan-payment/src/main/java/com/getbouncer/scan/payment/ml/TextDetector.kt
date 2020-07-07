@@ -395,6 +395,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
         }
 
         override val modelClass: String = "text_detection"
+        override val modelFrameworkVersion: Int = 1
         override val modelVersion: String = VERSION
         override val modelFileName: String = "dlnm.tflite"
         override val hash: String = "c84564bf856358fbb2995c962ef5dd4a892dcaa593b61bf540324475db26afef"

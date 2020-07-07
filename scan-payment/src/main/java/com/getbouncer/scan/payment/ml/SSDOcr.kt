@@ -236,12 +236,11 @@ class SSDOcr private constructor(interpreter: Interpreter) :
      * A loader for loading the model into memory
      */
     class ModelLoader(context: Context) : UpdatingResourceLoader(context) {
-        companion object {
-            const val VERSION = "darknite"
-        }
-
         override val resource: Int = R.raw.darknite
         override val modelFrameworkVersion: Int = 1
         override val modelClass: String = "ssdocr"
+        override val resourceModelVersion: String = "darknite"
+        override val resourceModelHash: String = ""
+        override val resourceModelHashAlgorithm: String = "SHA-256"
     }
 }
