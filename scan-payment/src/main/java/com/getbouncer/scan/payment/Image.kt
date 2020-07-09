@@ -123,7 +123,7 @@ fun Bitmap.fragment(
 fun Bitmap.zoom(
     centerSize: Size,
     toCenterDimension: Int,
-    toBorderSize: Int
+    toBorderWidth: Int
 ): Bitmap {
     val widthOffset = (centerSize.width / 2)
     val heightOffset = (centerSize.height / 2)
