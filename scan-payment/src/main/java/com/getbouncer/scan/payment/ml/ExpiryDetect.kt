@@ -116,7 +116,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
     ) = tfInterpreter.run(data, mlOutput)
 
     /**
-     * A factory for creating instances of the [ScreenDetect]. This downloads the model from the
+     * A factory for creating instances of the [ExpiryDetect]. This downloads the model from the
      * web. If unable to download from the web, this will throw a [FileNotFoundException].
      */
     class Factory(context: Context, loader: Loader) : TFLAnalyzerFactory<ExpiryDetect>(loader) {

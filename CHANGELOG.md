@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0013](https://github.com/getbouncer/scan-payment-android/tree/2.0.0013) (2020-07-08)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0012...2.0.0013)
+
+**Merged pull requests:**
+
+- Relocate analyzers [\#34](https://github.com/getbouncer/scan-payment-android/pull/34) ([awushensky](https://github.com/awushensky))
+- Support multiple MM/YYs on cards [\#32](https://github.com/getbouncer/scan-payment-android/pull/32) ([xsl](https://github.com/xsl))
+- Bump ktlint from 0.37.0 to 0.37.2 [\#31](https://github.com/getbouncer/scan-payment-android/pull/31) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Expiry extraction + new text detector [\#30](https://github.com/getbouncer/scan-payment-android/pull/30) ([xsl](https://github.com/xsl))
+
 ## [2.0.0012](https://github.com/getbouncer/scan-payment-android/tree/2.0.0012) (2020-06-15)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0011...2.0.0012)
