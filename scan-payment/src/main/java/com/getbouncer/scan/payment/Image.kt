@@ -89,7 +89,7 @@ fun hasOpenGl31(context: Context): Boolean {
 /**
  * Fragments the image into multiple segments and places them in new segments.
  */
-suspend fun Bitmap.fragment(
+fun Bitmap.fragment(
     fromSegments: Array<Rect>,
     toSegments: Array<Rect>,
     toSize: Size
@@ -102,18 +102,14 @@ suspend fun Bitmap.fragment(
     val result = Bitmap.createBitmap(toSize.width, toSize.height, this.config)
     val canvas = Canvas(result)
 
-    coroutineScope {
-        (0 until fromSegments.size).map {
-            launch {
-                val image = current.crop(fromSegments[it]).scale(toSegments[it].size())
-                canvas.drawBitmap(
-                    image,
-                    toSegments[it].left.toFloat(),
-                    toSegments[it].top.toFloat(),
-                    null
-                )
-            }
-        }.joinAll()
+    (0 until fromSegments.size).map {
+        val image = current.crop(fromSegments[it]).scale(toSegments[it].size())
+        canvas.drawBitmap(
+            image,
+            toSegments[it].left.toFloat(),
+            toSegments[it].top.toFloat(),
+            null
+        )
     }
 
     return result
@@ -124,7 +120,7 @@ suspend fun Bitmap.fragment(
  * and squeezes the remainder of the image into a border. The returned image is guaranteed to be
  * square.
  */
-suspend fun Bitmap.zoom(
+fun Bitmap.zoom(
     centerSize: Size,
     toCenterDimension: Int,
     toBorderSize: Int
