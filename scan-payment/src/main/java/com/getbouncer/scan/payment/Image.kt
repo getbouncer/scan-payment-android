@@ -8,9 +8,6 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.Size
 import com.getbouncer.scan.framework.util.size
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
@@ -187,59 +184,59 @@ fun Bitmap.zoom(
         Rect(
             0,
             0,
-            toBorderSize,
-            toBorderSize
+            toBorderWidth,
+            toBorderWidth
         ),
         Rect(
-            toBorderSize,
+            toBorderWidth,
             0,
-            toBorderSize + toCenterDimension,
-            toBorderSize
+            toBorderWidth + toCenterDimension,
+            toBorderWidth
         ),
         Rect(
-            toBorderSize + toCenterDimension,
+            toBorderWidth + toCenterDimension,
             0,
-            (2 * toBorderSize + toCenterDimension),
-            toBorderSize
+            (2 * toBorderWidth + toCenterDimension),
+            toBorderWidth
         ),
         Rect(
             0,
-            toBorderSize,
-            toBorderSize,
-            toBorderSize + toCenterDimension
+            toBorderWidth,
+            toBorderWidth,
+            toBorderWidth + toCenterDimension
         ),
         Rect(
-            toBorderSize,
-            toBorderSize,
-            toBorderSize + toCenterDimension,
-            toBorderSize + toCenterDimension
+            toBorderWidth,
+            toBorderWidth,
+            toBorderWidth + toCenterDimension,
+            toBorderWidth + toCenterDimension
         ),
         Rect(
-            toBorderSize + toCenterDimension,
+            toBorderWidth + toCenterDimension,
             112,
-            (2 * toBorderSize + toCenterDimension),
-            toBorderSize + toCenterDimension
+            (2 * toBorderWidth + toCenterDimension),
+            toBorderWidth + toCenterDimension
         ),
         Rect(
             0,
-            toBorderSize + toCenterDimension,
-            toBorderSize,
-            (2 * toBorderSize + toCenterDimension)
+            toBorderWidth + toCenterDimension,
+            toBorderWidth,
+            (2 * toBorderWidth + toCenterDimension)
         ),
         Rect(
-            toBorderSize,
-            toBorderSize + toCenterDimension,
-            toBorderSize + toCenterDimension,
-            (2 * toBorderSize + toCenterDimension)
+            toBorderWidth,
+            toBorderWidth + toCenterDimension,
+            toBorderWidth + toCenterDimension,
+            (2 * toBorderWidth + toCenterDimension)
         ),
         Rect(
-            toBorderSize + toCenterDimension,
-            toBorderSize + toCenterDimension,
-            (2 * toBorderSize + toCenterDimension),
-            (2 * toBorderSize + toCenterDimension)
+            toBorderWidth + toCenterDimension,
+            toBorderWidth + toCenterDimension,
+            (2 * toBorderWidth + toCenterDimension),
+            (2 * toBorderWidth + toCenterDimension)
         )
     )
-    val toSize = Size((2 * toBorderSize + toCenterDimension), (2 * toBorderSize + toCenterDimension))
+    val toSize = Size((2 * toBorderWidth + toCenterDimension), (2 * toBorderWidth + toCenterDimension))
 
     return this.fragment(fromSegments, toSegments, toSize)
 }
