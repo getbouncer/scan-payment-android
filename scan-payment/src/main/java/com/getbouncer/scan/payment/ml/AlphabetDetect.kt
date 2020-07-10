@@ -33,9 +33,9 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     override val name: String = Factory.NAME
 
-    override fun buildEmptyMLOutput() = arrayOf(FloatArray(NUM_CLASS))
+    override suspend fun buildEmptyMLOutput() = arrayOf(FloatArray(NUM_CLASS))
 
-    override fun interpretMLOutput(data: Input, mlOutput: Array<FloatArray>): Prediction {
+    override suspend fun interpretMLOutput(data: Input, mlOutput: Array<FloatArray>): Prediction {
         val prediction = mlOutput[0]
         val index = prediction.indexOfMax()
         val character = if (index != null && index > 0) {
@@ -49,11 +49,11 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         )
     }
 
-    override fun transformData(data: Input): ByteBuffer = data.objDetectionImage
+    override suspend fun transformData(data: Input): ByteBuffer = data.objDetectionImage
         .scale(TRAINED_IMAGE_SIZE)
         .toRGBByteBuffer()
 
-    override fun executeInference(
+    override suspend fun executeInference(
         tfInterpreter: Interpreter,
         data: ByteBuffer,
         mlOutput: Array<FloatArray>

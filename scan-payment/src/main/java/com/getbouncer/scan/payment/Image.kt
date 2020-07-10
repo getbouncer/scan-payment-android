@@ -4,8 +4,10 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.ConfigurationInfo
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Rect
 import android.util.Size
+import com.getbouncer.scan.framework.util.size
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
@@ -79,6 +81,164 @@ fun hasOpenGl31(context: Context): Boolean {
     } else {
         false
     }
+}
+
+/**
+ * Fragments the image into multiple segments and places them in new segments.
+ */
+fun Bitmap.fragment(
+    fromSegments: Array<Rect>,
+    toSegments: Array<Rect>,
+    toSize: Size
+): Bitmap {
+    require(fromSegments.size == toSegments.size) {
+        "Number of source segments does not match number of destination segments"
+    }
+
+    val current = this
+    val result = Bitmap.createBitmap(toSize.width, toSize.height, this.config)
+    val canvas = Canvas(result)
+
+    (0 until fromSegments.size).map {
+        val image = current.crop(fromSegments[it]).scale(toSegments[it].size())
+        canvas.drawBitmap(
+            image,
+            toSegments[it].left.toFloat(),
+            toSegments[it].top.toFloat(),
+            null
+        )
+    }
+
+    return result
+}
+
+/**
+ * Crops a piece from the center of the source image, resizing that to fit the new center dimension,
+ * and squeezes the remainder of the image into a border. The returned image is guaranteed to be
+ * square.
+ */
+fun Bitmap.zoom(
+    centerSize: Size,
+    toCenterDimension: Int,
+    toBorderWidth: Int
+): Bitmap {
+    val widthOffset = (centerSize.width / 2)
+    val heightOffset = (centerSize.height / 2)
+    val fromSegments = arrayOf<Rect>(
+        Rect(
+            0,
+            0,
+            (this.width / 2) - widthOffset,
+            (this.height / 2) - heightOffset
+        ),
+        Rect(
+            (this.width / 2) - widthOffset,
+            0,
+            (this.width / 2) + widthOffset,
+            this.height / 2 - heightOffset
+        ),
+        Rect(
+            (this.width / 2) + widthOffset,
+            0,
+            this.width,
+            (this.height / 2) - heightOffset
+        ),
+        Rect(
+            0,
+            (this.height / 2) - heightOffset,
+            (this.width / 2) - widthOffset,
+            (this.height / 2) + heightOffset
+        ),
+        Rect(
+            (this.width / 2) - widthOffset,
+            (this.height / 2) - heightOffset,
+            (this.width / 2) + widthOffset,
+            (this.height / 2) + heightOffset
+        ),
+        Rect(
+            (this.width / 2) + widthOffset,
+            (this.height / 2) - heightOffset,
+            this.width,
+            (this.height / 2) + heightOffset
+        ),
+        Rect(
+            0,
+            (this.height / 2) + heightOffset,
+            (this.width / 2) - widthOffset,
+            this.height
+        ),
+        Rect(
+            (this.width / 2) - widthOffset,
+            (this.height / 2) + heightOffset,
+            (this.width / 2) + widthOffset,
+            this.height
+        ),
+        Rect(
+            (this.width / 2) + widthOffset,
+            (this.height / 2) + heightOffset,
+            this.width,
+            this.height
+        )
+    )
+    val toSegments = arrayOf<Rect>(
+        Rect(
+            0,
+            0,
+            toBorderWidth,
+            toBorderWidth
+        ),
+        Rect(
+            toBorderWidth,
+            0,
+            toBorderWidth + toCenterDimension,
+            toBorderWidth
+        ),
+        Rect(
+            toBorderWidth + toCenterDimension,
+            0,
+            (2 * toBorderWidth + toCenterDimension),
+            toBorderWidth
+        ),
+        Rect(
+            0,
+            toBorderWidth,
+            toBorderWidth,
+            toBorderWidth + toCenterDimension
+        ),
+        Rect(
+            toBorderWidth,
+            toBorderWidth,
+            toBorderWidth + toCenterDimension,
+            toBorderWidth + toCenterDimension
+        ),
+        Rect(
+            toBorderWidth + toCenterDimension,
+            112,
+            (2 * toBorderWidth + toCenterDimension),
+            toBorderWidth + toCenterDimension
+        ),
+        Rect(
+            0,
+            toBorderWidth + toCenterDimension,
+            toBorderWidth,
+            (2 * toBorderWidth + toCenterDimension)
+        ),
+        Rect(
+            toBorderWidth,
+            toBorderWidth + toCenterDimension,
+            toBorderWidth + toCenterDimension,
+            (2 * toBorderWidth + toCenterDimension)
+        ),
+        Rect(
+            toBorderWidth + toCenterDimension,
+            toBorderWidth + toCenterDimension,
+            (2 * toBorderWidth + toCenterDimension),
+            (2 * toBorderWidth + toCenterDimension)
+        )
+    )
+    val toSize = Size((2 * toBorderWidth + toCenterDimension), (2 * toBorderWidth + toCenterDimension))
+
+    return this.fragment(fromSegments, toSegments, toSize)
 }
 
 /**
