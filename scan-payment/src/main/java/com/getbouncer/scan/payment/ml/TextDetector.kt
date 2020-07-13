@@ -14,6 +14,7 @@ import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
 import com.getbouncer.scan.framework.ml.ssd.rectForm
 import com.getbouncer.scan.payment.hasOpenGl31
+import com.getbouncer.scan.payment.ml.common.cropImageForObjectDetect
 import com.getbouncer.scan.payment.ml.ssd.DetectionBox
 import com.getbouncer.scan.payment.ml.yolo.processYoloLayer
 import com.getbouncer.scan.payment.scale
@@ -86,7 +87,7 @@ class TextDetector private constructor(interpreter: Interpreter) :
 
     private data class MergedBox(val box: DetectionBox, val subBoxes: List<DetectionBox>)
 
-    override val name: String = Factory.NAME
+    override val name: String = "text_detect"
 
     override suspend fun buildEmptyMLOutput() = mapOf(
         0 to arrayOf(
@@ -355,7 +356,11 @@ class TextDetector private constructor(interpreter: Interpreter) :
     }
 
     override suspend fun transformData(data: Input): Array<ByteBuffer> = arrayOf(
-        cropImageForObjectDetect(data.fullImage, data.previewSize, data.cardFinder)
+        cropImageForObjectDetect(
+            data.fullImage,
+            data.previewSize,
+            data.cardFinder
+        )
             .scale(TRAINED_IMAGE_SIZE)
             .toRGBByteBuffer()
     )
@@ -370,19 +375,20 @@ class TextDetector private constructor(interpreter: Interpreter) :
      * A factory for creating instances of the [TextDetect]. This downloads the model from the
      * web. If unable to download from the web, this will throw a [FileNotFoundException].
      */
-    class Factory(context: Context, loader: Loader) : TFLAnalyzerFactory<TextDetector>(loader) {
+    class Factory(
+        context: Context,
+        loader: Loader,
+        threads: Int = DEFAULT_THREADS
+    ) : TFLAnalyzerFactory<TextDetector>(loader) {
         companion object {
             private const val USE_GPU = false
-            private const val NUM_THREADS = 2
-            const val IS_THREAD_SAFE = true
-
-            const val NAME = "text_detect"
+            private const val DEFAULT_THREADS = 2
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
-            .setNumThreads(NUM_THREADS)
+            .setNumThreads(threads)
 
         override suspend fun newInstance(): TextDetector? = createInterpreter()?.let { TextDetector(it) }
     }
@@ -391,12 +397,8 @@ class TextDetector private constructor(interpreter: Interpreter) :
      * A loader for downloading and loading into memory instances of the [TextDetector] model.
      */
     class ModelLoader(context: Context) : ModelWebLoader(context) {
-        companion object {
-            const val VERSION = "20.16"
-        }
-
         override val modelClass: String = "text_detection"
-        override val modelVersion: String = VERSION
+        override val modelVersion: String = "20.16"
         override val modelFileName: String = "dlnm.tflite"
         override val hash: String = "c84564bf856358fbb2995c962ef5dd4a892dcaa593b61bf540324475db26afef"
     }

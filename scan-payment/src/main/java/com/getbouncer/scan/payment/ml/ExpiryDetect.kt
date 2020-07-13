@@ -55,7 +55,7 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
 
     private data class Digit(val digit: Int, val confidence: Float)
 
-    override val name: String = Factory.NAME
+    override val name: String = "expiry_detect"
 
     override suspend fun buildEmptyMLOutput() = arrayOf(arrayOf(Array(NUM_PREDICTIONS) { FloatArray(NUM_CLASS) }))
 
@@ -119,18 +119,20 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
      * A factory for creating instances of the [ExpiryDetect]. This downloads the model from the
      * web. If unable to download from the web, this will throw a [FileNotFoundException].
      */
-    class Factory(context: Context, loader: Loader) : TFLAnalyzerFactory<ExpiryDetect>(loader) {
+    class Factory(
+        context: Context,
+        loader: Loader,
+        threads: Int = DEFAULT_THREADS
+    ) : TFLAnalyzerFactory<ExpiryDetect>(loader) {
         companion object {
             private const val USE_GPU = false
-            private const val NUM_THREADS = 2
-
-            const val NAME = "expiry_detect"
+            private const val DEFAULT_THREADS = 2
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
             .Options()
             .setUseNNAPI(USE_GPU && hasOpenGl31(context))
-            .setNumThreads(NUM_THREADS)
+            .setNumThreads(threads)
 
         override suspend fun newInstance(): ExpiryDetect? = createInterpreter()?.let { ExpiryDetect(it) }
     }
@@ -139,10 +141,6 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
      * A loader for downloading and loading into memory instances of the [ScreenDetect] model.
      */
     class ModelLoader(context: Context) : ResourceLoader(context) {
-        companion object {
-            const val VERSION = "fourrecognize"
-        }
-
         override val resource: Int = R.raw.fourrecognize
     }
 }

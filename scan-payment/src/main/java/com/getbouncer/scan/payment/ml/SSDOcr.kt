@@ -141,7 +141,7 @@ class SSDOcr private constructor(interpreter: Interpreter) :
         }
     }
 
-    override val name: String = Factory.NAME
+    override val name: String = "ssd_ocr"
 
     /**
      * The model reshapes all the data to 1 x [All Data Points]
@@ -219,8 +219,6 @@ class SSDOcr private constructor(interpreter: Interpreter) :
             private const val DEFAULT_THREADS = 2
 
             val TRAINED_IMAGE_SIZE = Size(600, 375)
-
-            const val NAME = "ssd_ocr"
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
@@ -235,10 +233,6 @@ class SSDOcr private constructor(interpreter: Interpreter) :
      * A loader for loading the model into memory
      */
     class ModelLoader(context: Context) : ResourceLoader(context) {
-        companion object {
-            const val VERSION = "darknite"
-        }
-
         override val resource: Int = R.raw.darknite
     }
 }
