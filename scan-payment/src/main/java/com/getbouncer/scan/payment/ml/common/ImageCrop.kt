@@ -1,4 +1,4 @@
-package com.getbouncer.scan.payment.ml
+package com.getbouncer.scan.payment.ml.common
 
 import android.graphics.Bitmap
 import android.graphics.Rect
@@ -84,10 +84,11 @@ fun cropImageForObjectDetect(
 )
 
 fun calculateCardFinderCoordinatesFromObjectDetection(rect: RectF, previewImage: Size, cardFinder: Rect): RectF {
-    val objectDetection = calculateObjectDetectionFromCardFinder(
-        previewImage,
-        cardFinder
-    )
+    val objectDetection =
+        calculateObjectDetectionFromCardFinder(
+            previewImage,
+            cardFinder
+        )
     val scaled = rect.scaled(objectDetection.size())
     return RectF(
         /* left */ (scaled.left - (objectDetection.width() / 2 - cardFinder.width() / 2)) / cardFinder.width(),

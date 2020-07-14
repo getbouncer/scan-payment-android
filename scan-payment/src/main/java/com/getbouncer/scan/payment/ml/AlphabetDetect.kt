@@ -31,7 +31,7 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
 
     data class Prediction(val character: Char, val confidence: Float)
 
-    override val name: String = Factory.NAME
+    override val name: String = "alphabet_detect"
 
     override suspend fun buildEmptyMLOutput() = arrayOf(FloatArray(NUM_CLASS))
 
@@ -71,8 +71,6 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 2
-
-            const val NAME = "alphabet_detect"
         }
 
         override val tfOptions: Interpreter.Options = Interpreter
@@ -87,10 +85,6 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
      * A loader for downloading and loading into memory instances of the [AlphabetDetect] model.
      */
     class ModelLoader(context: Context) : ResourceLoader(context) {
-        companion object {
-            const val VERSION = "s48_a_50_char_v4_147_0_94_16"
-        }
-
         override val resource: Int = R.raw.s48_a_50_char_v4_147_0_94_16
     }
 }
