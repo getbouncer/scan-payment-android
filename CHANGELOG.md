@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0014](https://github.com/getbouncer/scan-payment-android/tree/2.0.0014) (2020-07-14)
+
+[Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0013...2.0.0014)
+
+**Merged pull requests:**
+
+- Standardize models [\#35](https://github.com/getbouncer/scan-payment-android/pull/35) ([awushensky](https://github.com/awushensky))
+- Image fragmentation [\#33](https://github.com/getbouncer/scan-payment-android/pull/33) ([smkuhne](https://github.com/smkuhne))
+
 ## [2.0.0013](https://github.com/getbouncer/scan-payment-android/tree/2.0.0013) (2020-07-08)
 
 [Full Changelog](https://github.com/getbouncer/scan-payment-android/compare/2.0.0012...2.0.0013)
