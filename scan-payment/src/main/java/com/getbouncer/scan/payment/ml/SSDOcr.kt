@@ -4,8 +4,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Size
-import com.getbouncer.scan.framework.Loader
-import com.getbouncer.scan.framework.ResourceLoader
+import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.Fetcher
+import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.ssd.adjustLocations
@@ -207,13 +208,13 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     ) = tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
 
     /**
-     * A factory for creating instances of the [SSDOcr].
+     * A factory for creating instances of this analyzer.
      */
     class Factory(
         context: Context,
-        loader: Loader,
+        fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<SSDOcr>(loader) {
+    ) : TFLAnalyzerFactory<SSDOcr>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 2
@@ -230,9 +231,14 @@ class SSDOcr private constructor(interpreter: Interpreter) :
     }
 
     /**
-     * A loader for loading the model into memory
+     * A fetcher for downloading model data.
      */
-    class ModelLoader(context: Context) : ResourceLoader(context) {
+    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
         override val resource: Int = R.raw.darknite
+        override val resourceModelVersion: String = "darknite"
+        override val resourceModelHash: String = "0ef6e590a5c8b0da63546079a0afacd8ccb72418af68972b72fda45deaca543a"
+        override val resourceModelHashAlgorithm: String = "SHA-256"
+        override val modelClass: String = "ocr"
+        override val modelFrameworkVersion: Int = 1
     }
 }

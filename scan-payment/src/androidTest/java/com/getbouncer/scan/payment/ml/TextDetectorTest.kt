@@ -33,7 +33,7 @@ class TextDetectorTest {
     @Test
     @SmallTest
     fun objectDetect_createsInterpreter() = runBlocking {
-        val loader = TextDetector.ModelLoader(testContext)
+        val loader = TextDetector.ModelFetcher(testContext)
         val factory = TextDetector.Factory(testContext, loader)
 
         val localFileName = loader.url.path.replace('/', '_')

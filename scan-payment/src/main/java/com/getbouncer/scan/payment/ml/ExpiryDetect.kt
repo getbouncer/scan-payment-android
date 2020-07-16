@@ -5,8 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
-import com.getbouncer.scan.framework.Loader
-import com.getbouncer.scan.framework.ResourceLoader
+import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.Fetcher
+import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.greedyNonMaxSuppression
@@ -116,14 +117,14 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
     ) = tfInterpreter.run(data, mlOutput)
 
     /**
-     * A factory for creating instances of the [ExpiryDetect]. This downloads the model from the
-     * web. If unable to download from the web, this will throw a [FileNotFoundException].
+     * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download
+     * from the web, this will throw a [FileNotFoundException].
      */
     class Factory(
         context: Context,
-        loader: Loader,
+        fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<ExpiryDetect>(loader) {
+    ) : TFLAnalyzerFactory<ExpiryDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 2
@@ -138,9 +139,14 @@ class ExpiryDetect private constructor(interpreter: Interpreter) :
     }
 
     /**
-     * A loader for downloading and loading into memory instances of the [ScreenDetect] model.
+     * A fetcher for downloading model data.
      */
-    class ModelLoader(context: Context) : ResourceLoader(context) {
+    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
         override val resource: Int = R.raw.fourrecognize
+        override val resourceModelVersion: String = "0.0.1.16"
+        override val resourceModelHash: String = "55eea0d57239a7e92904fb15209963f7236bd06919275bdeb0a765a94b559c97"
+        override val resourceModelHashAlgorithm: String = "SHA-256"
+        override val modelClass: String = "four_recognize"
+        override val modelFrameworkVersion: Int = 1
     }
 }
