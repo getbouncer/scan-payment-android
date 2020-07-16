@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.Fetcher
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer

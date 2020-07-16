@@ -6,7 +6,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.util.Size
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.Fetcher
 import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer

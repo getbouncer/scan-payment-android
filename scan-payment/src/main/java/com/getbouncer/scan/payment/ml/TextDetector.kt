@@ -8,7 +8,6 @@ import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.FetchedData
-import com.getbouncer.scan.framework.Fetcher
 import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
