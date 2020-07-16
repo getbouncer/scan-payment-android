@@ -9,7 +9,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertNotNull
 
-class TextDetectorTest {
+class AlphabetDetectTest {
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
     @Before
@@ -32,10 +32,10 @@ class TextDetectorTest {
     @Test
     @SmallTest
     fun createsInterpreter() = runBlocking {
-        val fetcher = TextDetector.ModelFetcher(testContext)
+        val fetcher = AlphabetDetect.ModelFetcher(testContext)
         fetcher.clearCache()
 
-        val factory = TextDetector.Factory(testContext, fetcher.fetchData(false))
+        val factory = AlphabetDetect.Factory(testContext, fetcher.fetchData(false))
 
         assertNotNull(factory.newInstance())
     }.let { Unit }

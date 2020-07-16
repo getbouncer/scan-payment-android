@@ -7,8 +7,8 @@ import android.graphics.RectF
 import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.framework.Config
-import com.getbouncer.scan.framework.Loader
-import com.getbouncer.scan.framework.ModelWebLoader
+import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.UpdatingModelWebFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.ml.hardNonMaximumSuppression
@@ -372,14 +372,14 @@ class TextDetector private constructor(interpreter: Interpreter) :
     ) = tfInterpreter.runForMultipleInputsOutputs(data, mlOutput)
 
     /**
-     * A factory for creating instances of the [TextDetect]. This downloads the model from the
-     * web. If unable to download from the web, this will throw a [FileNotFoundException].
+     * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download
+     * from the web, this will throw a [FileNotFoundException].
      */
     class Factory(
         context: Context,
-        loader: Loader,
+        fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<TextDetector>(loader) {
+    ) : TFLAnalyzerFactory<TextDetector>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 2
@@ -394,12 +394,14 @@ class TextDetector private constructor(interpreter: Interpreter) :
     }
 
     /**
-     * A loader for downloading and loading into memory instances of the [TextDetector] model.
+     * A fetcher for downloading model data.
      */
-    class ModelLoader(context: Context) : ModelWebLoader(context) {
+    class ModelFetcher(context: Context) : UpdatingModelWebFetcher(context) {
         override val modelClass: String = "text_detection"
-        override val modelVersion: String = "20.16"
-        override val modelFileName: String = "dlnm.tflite"
-        override val hash: String = "c84564bf856358fbb2995c962ef5dd4a892dcaa593b61bf540324475db26afef"
+        override val modelFrameworkVersion: Int = 1
+        override val defaultModelVersion: String = "20.16"
+        override val defaultModelFileName: String = "dlnm.tflite"
+        override val defaultModelHash: String = "c84564bf856358fbb2995c962ef5dd4a892dcaa593b61bf540324475db26afef"
+        override val defaultModelHashAlgorithm: String = "SHA-256"
     }
 }

@@ -3,8 +3,8 @@ package com.getbouncer.scan.payment.ml
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Size
-import com.getbouncer.scan.framework.Loader
-import com.getbouncer.scan.framework.ResourceLoader
+import com.getbouncer.scan.framework.FetchedData
+import com.getbouncer.scan.framework.UpdatingResourceFetcher
 import com.getbouncer.scan.framework.ml.TFLAnalyzerFactory
 import com.getbouncer.scan.framework.ml.TensorFlowLiteAnalyzer
 import com.getbouncer.scan.framework.util.indexOfMax
@@ -60,14 +60,14 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     ) = tfInterpreter.run(data, mlOutput)
 
     /**
-     * A factory for creating instances of the [AlphabetDetect]. This downloads the model from the
-     * web. If unable to download from the web, this will throw a [FileNotFoundException].
+     * A factory for creating instances of this analyzer. This downloads the model from the web. If unable to download
+     * from the web, this will throw a [FileNotFoundException].
      */
     class Factory(
         context: Context,
-        loader: Loader,
+        fetchedModel: FetchedData,
         threads: Int = DEFAULT_THREADS
-    ) : TFLAnalyzerFactory<AlphabetDetect>(loader) {
+    ) : TFLAnalyzerFactory<AlphabetDetect>(context, fetchedModel) {
         companion object {
             private const val USE_GPU = false
             private const val DEFAULT_THREADS = 2
@@ -82,9 +82,14 @@ class AlphabetDetect private constructor(interpreter: Interpreter) :
     }
 
     /**
-     * A loader for downloading and loading into memory instances of the [AlphabetDetect] model.
+     * A fetcher for downloading model data.
      */
-    class ModelLoader(context: Context) : ResourceLoader(context) {
+    class ModelFetcher(context: Context) : UpdatingResourceFetcher(context) {
         override val resource: Int = R.raw.s48_a_50_char_v4_147_0_94_16
+        override val resourceModelVersion: String = "4.147.0.94.16"
+        override val resourceModelHash: String = "429791e4c8bb53000ddb7bd70c87116c5b0f52b550e1d56d3bd613d4b8f4b66a"
+        override val resourceModelHashAlgorithm: String = "SHA-256"
+        override val modelClass: String = "char_recognize"
+        override val modelFrameworkVersion: Int = 1
     }
 }
