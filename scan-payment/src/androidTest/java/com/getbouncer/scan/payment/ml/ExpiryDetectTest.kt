@@ -10,7 +10,7 @@ import org.junit.Test
 import java.io.File
 import kotlin.test.assertNotNull
 
-class TextDetectorTest {
+class ExpiryDetectTest {
     private val testContext = InstrumentationRegistry.getInstrumentation().context
 
     @Before
@@ -33,10 +33,10 @@ class TextDetectorTest {
     @Test
     @SmallTest
     fun createsInterpreter() = runBlocking {
-        val fetcher = TextDetector.ModelFetcher(testContext)
+        val fetcher = ExpiryDetect.ModelFetcher(testContext)
         fetcher.clearCache()
 
-        val factory = TextDetector.Factory(testContext, fetcher.fetchData(false))
+        val factory = ExpiryDetect.Factory(testContext, fetcher.fetchData(false))
 
         assertNotNull(factory.newInstance())
     }.let { Unit }
