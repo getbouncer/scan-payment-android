@@ -1,37 +1,32 @@
 # scan-payment
-
 This repository contains the machine learning models and payment card utilities needed to quickly and accurately scan payment cards. [CardScan](https://cardscan.io/) is a relatively small library (1.9 MB) that provides fast and accurate payment card scanning.
 
 Note this library does not contain any user interfaces. Another library, [cardscan-ui](https://github.com/getbouncer/cardscan-ui-android) builds upon this one any adds simple user interfaces. 
 
 scan-payment serves as the foundation for CardScan and CardVerify enterprise libraries, which validate the authenticity of payment cards as they are scanned.
 
-![CardScan](docs/images/cardscan.png)
+![demo](docs/images/demo.gif)
 
 ## Contents
-
 * [Requirements](#requirements)
 * [Demo](#demo)
-* [Installation](#installation)
-* [Using scan-payment](#using-scan-payment)
-* [Developing scan-payment](#developing-scan-payment)
+* [Integration](#integration)
+* [Using](#using)
+* [Developing](#developing)
 * [Authors](#authors)
 * [License](#license)
 
 ## Requirements
-
 * Android API level 21 or higher
 * Kotlin coroutine compatibility
 
-Note: Your app does not have to be written in kotlin to integrate scan-payment, but must be able to depend on kotlin functionality.
+Note: Your app does not have to be written in kotlin to integrate this library, but must be able to depend on kotlin functionality.
 
 ## Demo
+An app demonstrating the basic capabilities of CardScan is available in [github](https://github.com/getbouncer/cardscan-demo-android).
 
-An app demonstrating the basic capabilities of scan-payment is available in [github](https://github.com/getbouncer/cardscan-demo-android).
-
-## Installation
-
-The scan-payment libraries are published in the [jcenter](https://jcenter.bintray.com/com/getbouncer/) repository, so for most gradle configurations you only need to add the dependencies to your app's `build.gradle` file:
+## Integration
+This library is published in the [jcenter](https://jcenter.bintray.com/com/getbouncer/) repository, so for most gradle configurations you only need to add the dependencies to your app's `build.gradle` file:
 
 ```gradle
 dependencies {
@@ -40,33 +35,27 @@ dependencies {
 }
 ```
 
-## Using scan-payment
+## Using
+This library is designed to be used with [cardscan-ui](https://github.com/getbouncer/cardscan-ui-android), which will provide user interfaces for scanning payment cards. However, it can be used independently.
 
-scan-payment is designed to be used with [cardscan-ui](https://github.com/getbouncer/cardscan-ui-android), which will provide user interfaces for scanning payment cards. However, it can be used independently.
+For an overview of the architecture and design of the scan framework, see the [architecture documentation](https://docs.getbouncer.com/card-scan/android-integration-guide/android-architecture-overview).
 
-For an overview of the architecture and design of the scan framework, see the [architecture documentation](https://github.com/getbouncer/scan-framework-android/tree/master/docs/architecture.md).
-
-## Developing scan-payment
-
-See the [development documentation](docs/develop.md) for details on developing for scan-payment.
+## Developing
+See the [development docs](https://docs.getbouncer.com/card-scan/android-integration-guide/android-development-guide) for details on developing this library.
 
 ## Authors
-
 Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
-
-scan-payment is available under paid and free licenses. See the [LICENSE](LICENSE) file for the full license text.
+This library is available under paid and free licenses. See the [LICENSE](LICENSE) file for the full license text.
 
 ### Quick summary
+In short, this library will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We're also adding some legal liability protections.
 
-In short, scan-payment will remain free forever for non-commercial applications, but use by commercial applications is limited to 90 days, after which time a licensing agreement is required. We're also adding some legal liability protections.
-
-After this period commercial applications need to convert to a licensing agreement to continue to use scan-payment.
+After this period commercial applications need to convert to a licensing agreement to continue to use this library.
 * Details of licensing (pricing, etc) are available at [https://cardscan.io/pricing](https://cardscan.io/pricing), or you can contact us at [license@getbouncer.com](mailto:license@getbouncer.com).
 
 ### More detailed summary
-
 What's allowed under the license:
 * Free use for any app for 90 days (for demos, evaluations, hackathons, etc).
 * Contributions (contributors must agree to the [Contributor License Agreement](Contributor%20License%20Agreement))
