@@ -1,3 +1,0 @@
-include ':scan-payment', ':scan-framework'
-rootProject.name='scan-payment-android'
-project(':scan-framework').projectDir = new File('scan-framework-android/scan-framework')
