@@ -156,6 +156,40 @@ class ImageTest {
         assertTrue(encounteredNonZeroPixel, "Pixels were all zero")
     }
 
+    @Test
+    @SmallTest
+    fun zoom_isCorrect() {
+        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
+        assertNotNull(bitmap)
+        assertEquals(600, bitmap.width, "Bitmap width is not expected")
+        assertEquals(375, bitmap.height, "Bitmap height is not expected")
+
+        // zoom the bitmap
+        val zoomedBitmap = bitmap.zoom(
+            centerSize = Size(224, 224),
+            toCenterDimension = 224,
+            toBorderWidth = 112
+        )
+
+        // check the expected sizes of the images
+        assertEquals(
+            Size(448, 448),
+            Size(zoomedBitmap.width, zoomedBitmap.height),
+            "Zoomed image is the wrong size"
+        )
+
+        // check each pixel of the images
+        var encounteredNonZeroPixel = false
+        for (x in 0 until zoomedBitmap.width) {
+            for (y in 0 until zoomedBitmap.height) {
+                val zoomedPixel = zoomedBitmap.getPixel(x, y)
+                encounteredNonZeroPixel = encounteredNonZeroPixel || zoomedPixel != 0
+            }
+        }
+
+        assertTrue(encounteredNonZeroPixel, "Pixels were all zero")
+    }
+
     private fun generateSampleBitmap(size: Size = Size(100, 100)): Bitmap {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val bitmap = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888)

@@ -124,7 +124,7 @@ fun Bitmap.zoom(
 ): Bitmap {
     val widthOffset = (centerSize.width / 2)
     val heightOffset = (centerSize.height / 2)
-    val fromSegments = arrayOf<Rect>(
+    val fromSegments = arrayOf(
         Rect(
             0,
             0,
@@ -180,7 +180,7 @@ fun Bitmap.zoom(
             this.height
         )
     )
-    val toSegments = arrayOf<Rect>(
+    val toSegments = arrayOf(
         Rect(
             0,
             0,
